@@ -8,11 +8,17 @@
  *
  * Text and number fields save on blur or Enter, not on every keystroke, so a
  * half-typed value isn't broadcast to everyone.
+ *
+ * Controls use the scaffold's UI kit (Select, Tabs, ConfirmModal), never
+ * browser-default widgets (docs: design/product-polish).
  */
 import { useEffect, useMemo, useState, type ComponentProps, type ReactNode } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { useMutations, useQuery } from 'deepspace'
-import { Button, Input, Label } from '@/components/ui'
+import {
+  Button, ConfirmModal, Input, Label, Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+  Tabs, TabsContent, TabsList, TabsTrigger,
+} from '@/components/ui'
 import { COMPONENT_TYPES, DEFAULT_SIZING, LABEL, type ComponentType } from '../../../../cost/board'
 import { compute } from '../../../../cost/costModel'
 import { boardToPrices } from '../../../../cost/quantify'
@@ -21,9 +27,11 @@ import { fieldsFor, specFor } from '../../../../board/fields'
 import { CostPanel } from '../../../../board/CostPanel'
 import { ReviewPanel, findingCounts, type ReviewRow } from '../../../../board/ReviewPanel'
 import { boardFingerprint } from '../../../../board/fingerprint'
+import { BoardDiagram } from '../../../../board/BoardDiagram'
+import { PresenceStrip, useBoardPresence } from '../../../../board/BoardPresence'
 
-const selectClass =
-  'h-10 w-full rounded-md border border-input bg-transparent px-3 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring'
+/** Select values must be non-empty, so "use the default" is this sentinel. */
+const DEFAULT_CHOICE = '__default__'
 
 export default function BoardPage() {
   const { boardId = '' } = useParams()
@@ -36,6 +44,8 @@ export default function BoardPage() {
   const compMut = useMutations<ComponentRow>('components')
   const flowMut = useMutations<FlowRow>('flows')
   const [selectedId, setSelectedId] = useState<string | null>(null)
+  const [confirmDelete, setConfirmDelete] = useState(false)
+  const presence = useBoardPresence(boardId, selectedId)
 
   const board = boards.records.find((b) => b.recordId === boardId)
   const selected = components.records.find((c) => c.recordId === selectedId)
@@ -56,7 +66,15 @@ export default function BoardPage() {
       ? 'Internet egress'
       : components.records.find((c) => c.recordId === id)?.data.label || '(removed component)'
 
-  if (boards.status === 'loading') return <p className="p-6 text-sm text-muted-foreground">Loading board…</p>
+  if (boards.status === 'loading') {
+    return (
+      <div className="mx-auto max-w-6xl space-y-4 px-6 py-8" aria-busy="true">
+        <div className="h-10 w-1/3 animate-pulse rounded-md bg-muted" />
+        <div className="h-40 animate-pulse rounded-lg bg-muted" />
+        <div className="h-64 animate-pulse rounded-lg bg-muted" />
+      </div>
+    )
+  }
   if (!board) {
     return (
       <div className="p-6 text-sm">
@@ -67,6 +85,7 @@ export default function BoardPage() {
 
   function addComponent(type: ComponentType) {
     const n = components.records.filter((c) => c.data.type === type).length + 1
+    // x/y 0,0 = "not placed yet": the diagram lays it out in its layer's column.
     const id = compMut.create({ boardId, type, label: `${LABEL[type]} ${n}`, x: 0, y: 0 })
     void id.then(setSelectedId)
   }
@@ -102,6 +121,9 @@ export default function BoardPage() {
           />
         </div>
       </div>
+      <div className="mt-2">
+        <PresenceStrip peers={presence.peers} connected={presence.connected} />
+      </div>
 
       <div className="mt-6">
         <CostPanel result={cost} />
@@ -122,46 +144,69 @@ export default function BoardPage() {
         </div>
       </section>
 
-      <div className="mt-6 grid gap-6 md:grid-cols-[1fr_22rem]">
-        <section>
-          <h2 className="mb-2 text-sm font-medium text-muted-foreground">
-            Components ({components.records.length})
-          </h2>
-          {components.records.length === 0 ? (
-            <p className="rounded-lg border border-dashed border-border p-6 text-sm text-muted-foreground">
-              Nothing here yet. Add a service, database or any other component above.
-            </p>
-          ) : (
-            <ul className="grid gap-2 sm:grid-cols-2">
-              {components.records.map((c) => (
-                <li key={c.recordId}>
-                  <button
-                    type="button"
-                    onClick={() => setSelectedId(c.recordId)}
-                    className={`w-full rounded-lg border p-3 text-left hover:bg-accent ${
-                      c.recordId === selectedId ? 'border-primary ring-1 ring-primary' : 'border-border'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between text-xs uppercase tracking-wide text-muted-foreground">
-                      <span>{LABEL[c.data.type as ComponentType] ?? c.data.type}</span>
-                      {counts.get(c.recordId) && (
-                        <span
-                          title="Findings in the latest AI review"
-                          className={`rounded px-1.5 py-0.5 normal-case tracking-normal ${
-                            counts.get(c.recordId)!.high ? 'bg-red-500/15 text-red-600 dark:text-red-400' : 'bg-amber-500/15 text-amber-700 dark:text-amber-400'
+      <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_22rem]">
+        <section className="min-w-0">
+          <Tabs defaultValue="diagram">
+            <div className="flex items-center justify-between">
+              <h2 className="text-sm font-medium text-muted-foreground">Components ({components.records.length})</h2>
+              <TabsList>
+                <TabsTrigger value="diagram">Diagram</TabsTrigger>
+                <TabsTrigger value="list">List</TabsTrigger>
+              </TabsList>
+            </div>
+            <TabsContent value="diagram">
+              <BoardDiagram
+                components={components.records}
+                flows={flows.records}
+                selectedId={selectedId}
+                onSelect={setSelectedId}
+                onMove={(moves) => moves.forEach((m) => compMut.put(m.id, { x: m.x, y: m.y }))}
+                findingCounts={counts}
+                summaryOf={sizingSummary}
+                peerSelections={presence.selections}
+              />
+              <p className="mt-1 text-xs text-muted-foreground">Drag a box to move it for everyone. Click to edit.</p>
+            </TabsContent>
+            <TabsContent value="list">
+              {components.records.length === 0 ? (
+                <p className="rounded-lg border border-dashed border-border p-6 text-sm text-muted-foreground">
+                  Nothing here yet. Add a service, database or any other component above.
+                </p>
+              ) : (
+                <ul className="grid gap-2 sm:grid-cols-2">
+                  {components.records.map((c) => {
+                    const count = counts.get(c.recordId)
+                    return (
+                      <li key={c.recordId}>
+                        <button
+                          type="button"
+                          onClick={() => setSelectedId(c.recordId)}
+                          className={`w-full rounded-lg border p-3 text-left hover:bg-accent ${
+                            c.recordId === selectedId ? 'border-primary ring-1 ring-primary' : 'border-border'
                           }`}
                         >
-                          {counts.get(c.recordId)!.total} finding{counts.get(c.recordId)!.total === 1 ? '' : 's'}
-                        </span>
-                      )}
-                    </div>
-                    <div className="font-medium">{c.data.label || '(unnamed)'}</div>
-                    <div className="mt-1 text-xs text-muted-foreground">{sizingSummary(c.data)}</div>
-                  </button>
-                </li>
-              ))}
-            </ul>
-          )}
+                          <div className="flex items-center justify-between text-xs uppercase tracking-wide text-muted-foreground">
+                            <span>{LABEL[c.data.type as ComponentType] ?? c.data.type}</span>
+                            {count && (
+                              <span
+                                className={`rounded px-1.5 py-0.5 normal-case tracking-normal ${
+                                  count.high ? 'bg-red-500/15 text-red-600 dark:text-red-400' : 'bg-amber-500/15 text-amber-700 dark:text-amber-400'
+                                }`}
+                              >
+                                {count.total} finding{count.total === 1 ? '' : 's'}
+                              </span>
+                            )}
+                          </div>
+                          <div className="font-medium">{c.data.label || '(unnamed)'}</div>
+                          <div className="mt-1 text-xs text-muted-foreground">{sizingSummary(c.data)}</div>
+                        </button>
+                      </li>
+                    )
+                  })}
+                </ul>
+              )}
+            </TabsContent>
+          </Tabs>
 
           <FlowsEditor
             boardId={boardId}
@@ -172,19 +217,32 @@ export default function BoardPage() {
           />
         </section>
 
-        <aside className="rounded-lg border border-border p-4">
+        <aside className="h-fit rounded-lg border border-border p-4 lg:sticky lg:top-4">
           {selected ? (
             <ComponentEditor
               key={selected.recordId}
               row={selected.data}
               onSave={(patch) => compMut.put(selected.recordId, patch)}
-              onDelete={() => deleteComponent(selected.recordId)}
+              onDelete={() => setConfirmDelete(true)}
             />
           ) : (
             <p className="text-sm text-muted-foreground">Select a component to edit its name and sizing.</p>
           )}
         </aside>
       </div>
+
+      <ConfirmModal
+        open={confirmDelete && !!selected}
+        onClose={() => setConfirmDelete(false)}
+        onConfirm={() => {
+          if (selected) deleteComponent(selected.recordId)
+          setConfirmDelete(false)
+        }}
+        title={`Delete "${selected?.data.label || 'component'}"?`}
+        description="This removes it and its flows from the board for everyone."
+        confirmText="Delete"
+        variant="destructive"
+      />
     </div>
   )
 }
@@ -224,31 +282,32 @@ function ComponentEditor({
         const id = `field-${field}`
         const label = 'unit' in spec && spec.unit ? `${spec.label} (${spec.unit})` : spec.label
         const current = row[field]
-        const placeholder = `${formatValue(defaults[field])} (default)`
+        const defaultLabel = `${formatValue(defaults[field])} (default)`
+        if (spec.kind === 'number') {
+          return (
+            <Field key={field} label={label} htmlFor={id}>
+              <NumberSave id={id} value={(current as number | null) ?? null} placeholder={defaultLabel} step={spec.step}
+                onSave={(v) => onSave({ [field]: v })} />
+            </Field>
+          )
+        }
+        // Choices and yes/no keep a "Default" option, which clears the column.
+        const value = current === null || current === undefined || current === ''
+          ? DEFAULT_CHOICE
+          : String(current === true ? 1 : current === false ? 0 : current)
         return (
           <Field key={field} label={label} htmlFor={id}>
-            {spec.kind === 'number' ? (
-              <NumberSave id={id} value={(current as number | null) ?? null} placeholder={placeholder} step={spec.step}
-                onSave={(v) => onSave({ [field]: v })} />
-            ) : (
-              // Choices and yes/no keep a "Default" option, which clears the column.
-              <select
-                id={id}
-                className={selectClass}
-                value={current === null || current === undefined ? '' : String(current === true ? 1 : current === false ? 0 : current)}
-                onChange={(e) => onSave({ [field]: parseChoice(spec.kind, e.target.value) })}
-              >
-                <option value="">{placeholder}</option>
-                {spec.kind === 'bool' ? (
-                  <>
-                    <option value="1">yes</option>
-                    <option value="0">no</option>
-                  </>
-                ) : (
-                  spec.options.map((o) => <option key={o} value={String(o)}>{String(o)}</option>)
-                )}
-              </select>
-            )}
+            <Select value={value} onValueChange={(v) => onSave({ [field]: parseChoice(spec.kind, v) })}>
+              <SelectTrigger id={id} aria-label={label} className="w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={DEFAULT_CHOICE}>{defaultLabel}</SelectItem>
+                {spec.kind === 'bool'
+                  ? [<SelectItem key="1" value="1">yes</SelectItem>, <SelectItem key="0" value="0">no</SelectItem>]
+                  : spec.options.map((o) => <SelectItem key={o} value={String(o)}>{String(o)}</SelectItem>)}
+              </SelectContent>
+            </Select>
           </Field>
         )
       })}
@@ -258,9 +317,9 @@ function ComponentEditor({
   )
 }
 
-/** Select value -> column value: '' clears; bool -> true/false; numeric options -> number. */
+/** Select value -> column value: the default sentinel clears; bool -> true/false; numeric options -> number. */
 function parseChoice(kind: 'choice' | 'bool', v: string): unknown {
-  if (v === '') return null
+  if (v === DEFAULT_CHOICE || v === '') return null
   if (kind === 'bool') return v === '1'
   return /^\d+$/.test(v) ? Number(v) : v
 }
@@ -282,6 +341,9 @@ function FlowsEditor({
   const [toId, setToId] = useState('')
   const [label, setLabel] = useState('')
   const name = (id: string) => components.find((c) => c.recordId === id)?.data.label || '(deleted)'
+  const options = components.map((c) => (
+    <SelectItem key={c.recordId} value={c.recordId}>{c.data.label || '(unnamed)'}</SelectItem>
+  ))
 
   return (
     <section className="mt-8">
@@ -295,17 +357,18 @@ function FlowsEditor({
           setLabel('')
         }}
       >
-        <select aria-label="From" className={selectClass} value={fromId} onChange={(e) => setFromId(e.target.value)}>
-          <option value="">From…</option>
-          {components.map((c) => <option key={c.recordId} value={c.recordId}>{c.data.label}</option>)}
-        </select>
-        <select aria-label="To" className={selectClass} value={toId} onChange={(e) => setToId(e.target.value)}>
-          <option value="">To…</option>
-          {components.map((c) => <option key={c.recordId} value={c.recordId}>{c.data.label}</option>)}
-        </select>
+        <Select value={fromId} onValueChange={setFromId}>
+          <SelectTrigger aria-label="From" className="w-full"><SelectValue placeholder="From…" /></SelectTrigger>
+          <SelectContent>{options}</SelectContent>
+        </Select>
+        <Select value={toId} onValueChange={setToId}>
+          <SelectTrigger aria-label="To" className="w-full"><SelectValue placeholder="To…" /></SelectTrigger>
+          <SelectContent>{options}</SelectContent>
+        </Select>
         <Input aria-label="Flow label" value={label} onChange={(e) => setLabel(e.target.value)} placeholder="Label (optional)" maxLength={80} />
         <Button type="submit" variant="secondary" disabled={!fromId || !toId || fromId === toId}>Add flow</Button>
       </form>
+      {fromId && fromId === toId && <p className="mt-1 text-xs text-destructive">A flow needs two different components.</p>}
       {flows.length > 0 && (
         <ul className="mt-3 space-y-1 text-sm">
           {flows.map((f) => (

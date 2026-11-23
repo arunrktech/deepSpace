@@ -334,3 +334,52 @@ I also read the starter's `src/ai/agent.ts`, `tools.ts` and `chat-routes.ts`, wh
 **What the owner verified:**
 - [ ] Read the review on "Cost check" and judge whether the findings are sensible
 - [ ] Decide: keep Sonnet 5.5 and caller-pays, or switch
+
+---
+
+## Step 8: Diagram view, presence, and polish (2026-11-23)
+
+**DeepSpace docs read** (Markdown):
+- https://docs.deep.space/guides/presence-and-cursors: `usePresenceRoom`; state is in memory only; `peers` excludes me; identity comes from the verified sign-in; peers can appear a moment after joining; re-send state after a reconnect; `getUserColor`.
+- https://docs.deep.space/design/product-polish: use the scaffold's UI kit, never native `<select>` or `confirm()`; a `ConfirmModal` that names the item; the home is the real primary surface with a declared pattern; pulse placeholders while loading; the gate greps.
+
+The worker already had `AppPresenceRoom` wired, so presence needed no server change.
+
+**Files:**
+- `src/board/layout.ts` (+ test): automatic layout, arrow endpoints, snapping, and `movesForDrag`.
+- `src/board/BoardDiagram.tsx`: the SVG diagram.
+- `src/board/BoardPresence.tsx`: the presence hook and avatar strip.
+- `src/board/example.ts`: the comparator example board used for previews.
+- The board page reworked: Diagram/List tabs, kit `Select`, `ConfirmModal`, a pulse loading state.
+- `src/pages/index.tsx` (landing) and `src/pages/(app)/home.tsx`.
+- `APP_DISPLAY_NAME` added in `constants.ts`, and used in the nav, the page title and `seo.ts`.
+
+**Decisions and tradeoffs:**
+- **Drag saves once, on release**, not on every move. Other viewers see the box jump to its new place on drop, not slide. Smooth shared dragging is what DeepSpace's Canvas room does; we chose collections for typed data in step 5.
+- **Automatic layout by layer** (edge → app → data, the comparator's `tier`) for boxes never dragged (`x`, `y` = 0, 0). It's pure, so every viewer computes the same picture without storing it.
+- **Pin automatic boxes on the first drag** (`movesForDrag`). Found live: dragging the database made the never-placed storage box jump, because the automatic layout stacked it under the database's new position. Each drag now also saves the current spot of any still-automatic box, so nothing moves by itself.
+- **Presence shares only "which component I have selected"**: other viewers see your colour outline and initials on that box, plus an avatar strip ("1 other here"). No live cursors; that would add a lot of messages for little review value. The same person in two tabs counts twice (one presence per connection).
+- **The SVG scales to fit its column** (`viewBox` + `width: 100%`). Found live: the data column was cut off. Dragging still lines up because pointer positions go through `getScreenCTM()`.
+- **Drag state in a `ref`**, and the final position taken from the release event. Found live: a quick drag (press, one move, release) was read as a click, because React state hadn't updated yet when the release came.
+- **Polish gate:** native `<select>` replaced by the kit `Select` (with a `__default__` sentinel, because its values must be non-empty). Delete uses `ConfirmModal` naming the component. Loading shows pulse placeholders.
+- **Home:** `/home` signed in = the boards list (the primary surface). Signed out = a pitch, the real `CostPanel` on the example board, and inline sign-in. The pattern is declared on the first line. The static landing `/` is a split hero with the same live example panel.
+- **Not done:** a custom theme (the gate's `data-theme` check). The app still uses the scaffold theme. Left out to keep this step small.
+
+**What the agent did:**
+- Results: `vitest run` gives **177/177** passing (8 new), `tsc` and `eslint` are clean, and the gate greps are clean (no native `<select>`, `confirm`, `alert` or `prompt`, no placeholder text, home pattern present).
+- **Live test in two Chrome tabs** on "Cost check":
+  1. The diagram drew the components in layer columns, with the flow arrow.
+  2. The presence strip showed "1 other here" in each tab.
+  3. Dragging Service 1 saved (110, 210) and showed it in both tabs.
+  4. Clicking Service 1 in tab A outlined it in tab B with "Arun Kumar is editing this".
+  5. After the scaling fix: a quick drag first failed (read as a click), then worked after the ref fix (Database 1 → (640, 250) in both tabs).
+  6. Then the jump bug (storage moved). After the pin fix, dragging Database 1 to (460, 120) left Object storage 1, Cache 1 and Queue 1 exactly where they were.
+  7. The delete `ConfirmModal` read 'Delete "Queue 1"?'; Cancel kept it.
+  8. The landing showed the example panel with $167.67 / $173.46 / $159.26.
+  9. `/home` signed in shows the boards list. No console errors.
+- Test data left on "Cost check": Cache 1 and Queue 1 (on default sizing), and moved boxes.
+- **Not checked live:** the signed-out `/home`, which would mean signing the owner out.
+
+**What the owner verified:**
+- [ ] Drag a box yourself, and watch another window
+- [ ] Look at the landing page `/` signed out (a private window) and judge the copy

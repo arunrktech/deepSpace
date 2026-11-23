@@ -19,3 +19,6 @@ export const SCOPE_ID = `app:${APP_ID}`
 
 /** Roles and display config — imported from SDK (single source of truth) */
 export { ROLES, ROLE_CONFIG, type Role } from 'deepspace'
+
+/** Product name shown in the UI. APP_NAME above stays the CLI's app name. */
+export const APP_DISPLAY_NAME = 'ArchReview Room'
