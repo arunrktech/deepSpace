@@ -81,3 +81,67 @@ Take-home due **Wed Nov 25, 11:59 PM ET**.
 **What the owner verified:**
 - [ ] Read `costModel.ts` side by side with `cost_model.py`
 - [ ] Ran `npm run test:unit` yourself
+
+---
+
+## Step 3: Dated price snapshot (2026-11-23)
+
+**Docs read:** none needed (no DeepSpace features). Followed the comparator's `references/pricing_sources.md` (official URLs per service) and `references/pricing_quirks.md` (traps that skew totals).
+
+**File:** `src/cost/snapshot.ts` holds 22 price keys × 3 clouds = 66 prices, all dated 2026-11-23. Tests are in `src/cost/snapshot.test.ts`.
+
+**Regions:** AWS `us-east-1`, GCP `us-east1` (South Carolina), Azure `eastus`. All three are on the US East coast, so the comparison is like for like. The comparator's example used GCP Iowa only because Google's pages default to it.
+
+**Where the prices came from:**
+- **Azure:** the Retail Prices API (`prices.azure.com`, no login). Source `api`.
+- **AWS:** the public Price List bulk CSVs from `pricing.us-east-1.amazonaws.com`, published Nov 11–21. The 300 MB EC2 file was streamed and filtered without saving it. Source `api`.
+- **Google Cloud:** the official pricing pages in Chrome, with each table's region selector switched to South Carolina (us-east1). Source `page`.
+- **Runtime:** the app never calls a vendor API. "No live vendor APIs" applies to the running app; the snapshot was built once, today.
+
+**What each board type maps to:**
+
+| Board type | AWS | Google Cloud | Azure | Snapshot keys |
+|---|---|---|---|---|
+| service | EC2 m7i | n2-standard | Dsv5 | `vm.2vcpu`, `vm.4vcpu`, `vm.8vcpu` (4 GiB per vCPU, Linux) |
+| database | RDS PostgreSQL db.m7i | Cloud SQL PostgreSQL Enterprise | PG Flexible Server Ddsv5 | `db.{2,4}vcpu[.ha]`, `db.storage[.ha]` |
+| cache | ElastiCache **Valkey** t4g.small / m7g.large | Memorystore **Valkey** nano / standard-small | Cache for **Redis** C1 / C3 | `cache.{small,medium}[.ha]` |
+| queue | SQS standard | Pub/Sub | Service Bus Standard | `queue.base`, `queue.usage` |
+| LB | ALB | Cloud Load Balancing | Application Gateway v2 | `lb.hour`, `lb.processed` |
+| CDN | CloudFront | Cloud CDN | Front Door Standard | `cdn.base`, `cdn.transfer`, `cdn.requests` |
+| storage | S3 Standard | Cloud Storage Standard | Blob Hot LRS | `storage.gb` |
+| (internet egress) | Data transfer out | Premium tier egress | MS-network routing | `egress.internet` |
+
+**Decisions and tradeoffs:**
+- **Derived prices are written as arithmetic in code** (`519 / HOURS_PER_YEAR`, `0.000027397 * HOURS_PER_MONTH`, `cloudSql(2, 8, 0.0413, 0.007)`), so a reviewer can check them against the source without a calculator.
+- **HA is its own price key (`.ha`).** Each cloud bills HA differently:
+  - AWS RDS Multi-AZ has its own SKU.
+  - Cloud SQL has HA per-vCPU and per-GiB rates.
+  - Azure bills the standby too. This is confirmed by the FAQ on Azure's PostgreSQL pricing page ("billed for the provisioned compute and storage for both the primary and secondary replica").
+  - Cache HA is 2 nodes on AWS and GCP; Azure's Standard-tier price already covers both nodes.
+- **Cache engine is Valkey on AWS and GCP, Redis on Azure.** Google's Memorystore for **Redis** pricing page returns 404, both in the browser and server-side, so GCP uses Memorystore for Valkey. AWS uses Valkey too, so AWS and GCP match. Azure has no managed Valkey, so it uses Redis. All three speak the Redis protocol. The tradeoff: ElastiCache Redis would cost about 25% more than Valkey ($0.158 vs $0.1264 per hour for m7g.large).
+- **Missing commitment prices are left out, not estimated.** The commitment scenario then uses on demand for those lines, the same rule as the cost model. This affects RDS db.m7i.xlarge (no 1-year no-upfront row in the offer file) and Azure Cache Basic/Standard (no reservation offered).
+- **Free tiers are excluded, except the internet egress allowance** (per `pricing_quirks.md`). Excluded: SQS's 1M free requests, Pub/Sub's 10 GiB, CloudFront's 1 TB. Kept: AWS's and Azure's first 100 GB of egress (modelled as a $0 band).
+- **Tiered prices are stored as bands (`tiers`).** Step 4 will split a quantity across them.
+- **GiB vs GB:** each price keeps the vendor's own unit (`GiB-month` on Google Cloud, `GB-month` on AWS and Azure). Step 4 must convert sizes before multiplying.
+- **Not priced, and noted on each line:** storage requests and operations, CDN cache fill, Front Door requests above 250M, CDN bands above 1 PB.
+- **Two prices needing a check:**
+  - GCP n2-standard prices for us-east1 equal Iowa's. The region switch is known to work, because Memorystore's us-east1 prices differ from Iowa's.
+  - Azure Application Gateway Standard v2 is $0.20 per hour in the API, which is lower than Azure's often-quoted $0.246.
+  Both are listed for spot-checking below.
+
+**What the agent did:**
+- Queried the Azure Retail Prices API with OData filters, using a throwaway scratch script.
+- Downloaded and filtered the AWS bulk CSVs with a throwaway CSV filter.
+- Read six Google Cloud pricing pages in Chrome. A browser tab script picked the table's region option and read the rows.
+- Used Chrome again to confirm the Azure HA billing FAQ.
+- Wrote `snapshot.ts` and `snapshot.test.ts`.
+- Results: `vitest run` gives **120/120** passing (73 new), `tsc --noEmit` is clean, and `eslint src/cost` is clean.
+
+**What the tests prove:** one price per key per cloud; every URL passes `officialUrl`; every entry is dated, finite and non-negative; commitment prices are no higher than on demand; tiers are in order and open-ended; HA costs at least as much as single; the whole snapshot passes the cost model's `validate()`; and four derived numbers match their notes. They **can't** prove a price is correct. That needs a human check against the source.
+
+**What the owner verified (spot-check five prices against their source):**
+- [ ] AWS EC2 m7i.large $0.1008/h; 1-year no upfront $0.06668/h (https://aws.amazon.com/ec2/pricing/on-demand/ and its Reserved tab)
+- [ ] GCP n2-standard-2, South Carolina: $0.097118/h (https://cloud.google.com/products/compute/pricing/general-purpose)
+- [ ] Azure D2s v5 East US Linux: $0.096/h (https://azure.microsoft.com/pricing/details/virtual-machines/linux/)
+- [ ] Azure Application Gateway Standard v2 East US fixed price: $0.20/h (https://azure.microsoft.com/pricing/details/application-gateway/)
+- [ ] GCP Memorystore for Valkey standard-small, South Carolina: $0.161/h (https://cloud.google.com/memorystore/valkey/pricing)
