@@ -383,3 +383,40 @@ The worker already had `AppPresenceRoom` wired, so presence needed no server cha
 **What the owner verified:**
 - [ ] Drag a box yourself, and watch another window
 - [ ] Look at the landing page `/` signed out (a private window) and judge the copy
+
+---
+
+## Step 9: README, GitHub, deploy (2026-11-23)
+
+**DeepSpace docs read** (Markdown):
+- https://docs.deep.space/concepts/deployment: what deploy does; the app id; state survives deploys; secrets come from the store, not `.dev.vars`
+- https://docs.deep.space/guides/source-control: **the first deploy permanently claims the app's source**: a GitHub remote means GitHub source
+- https://docs.deep.space/guides/releases-and-rollback
+- https://docs.deep.space/guides/secrets
+
+**Decision (owner): GitHub source.** `deepspace status --json` reported `sourceInference: "github"` because `origin` is `github.com/arunrktech/deepSpace`, the take-home repo. With GitHub source, deploy ships the working tree and Git is managed through GitHub; DeepSpace `push`/`pull` now refuse for this app. This can't be undone.
+
+**What the agent did:**
+- Wrote `README.md`: features, cost engine, run and test, layout, known limits. Committed as `a2b26da`.
+- **Secrets scan of the full history to be pushed** (9 commits): every added line was checked against key and token patterns (AWS, GitHub, Slack, Google API keys, JWTs, private keys, `password=` / `token=` literals, Gmail addresses), and file names against `.env`, `.dev.vars`, `.deepspace/`, `.pem` and `.key`. **No matches.** Before trusting a clean result, I confirmed the patterns catch a planted AWS key and email.
+- Told the owner that commits are authored as their global Git identity (Gmail address), which becomes public on push. The owner approved the push as is.
+- `git push -u origin main`: the remote `main` is `a2b26da` (new branch, no force).
+- `npx deepspace deploy` (owner-approved): claimed GitHub source `arunrktech/deepspace`, shipped the clean working tree (21 assets, 843 KiB), and edge and data plane were confirmed.
+  - **Live: https://archreview.app.space**
+  - **Release:** `rel_01M84T5HR9W3HHE92ATZ7RZFTH` (seq 1). No commit lineage recorded, by GitHub-source design; the deployed tree equals `a2b26da`.
+  - The deploy changed no local files.
+- **Live checks:**
+  - With curl: `/`, `/home`, `/boards` → 200; the title is "ArchReview Room"; an unauthenticated `reviewBoard` call → 401.
+  - **Signed-out `/home`** (couldn't be tested locally): the pitch plus a sample board priced at $167.67 / $173.46 / $159.26, with no console errors.
+  - **Signed in** (the owner signed in on the live site), two tabs on a new board, "Live check":
+    - Adding a Service and Object storage synced to tab B, with presence "1 other here" and totals **$167.67 / $173.46 / $159.26** (Azure cheapest).
+    - Dragging Service 1 moved it to (250, 160) in tab B, and the never-placed storage box stayed put.
+    - No console errors.
+  - **Not run on the live site:** an AI review. It bills a Sonnet call; it was verified locally in step 7.
+
+**State at submission:** 10 commits on `main`, pushed through `a2b26da` (this entry adds one more). Live app on release #1. The test board "Live check" (Service 1 and Object storage 1) exists in production data; delete it from the board page if you don't want it there.
+
+**What the owner verified:**
+- [x] Signed in on the live site
+- [ ] Open https://archreview.app.space in two windows and try it yourself
+- [ ] Still open from earlier steps: spot-check prices (step 3), the LB and queue approximations (step 4), the reviewer's model and billing (step 7)
