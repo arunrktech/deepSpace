@@ -19,6 +19,8 @@ import { boardToPrices } from '../../../../cost/quantify'
 import { boardFromRecords, type BoardRow, type ComponentRow, type FlowRow } from '../../../../board/fromRecords'
 import { fieldsFor, specFor } from '../../../../board/fields'
 import { CostPanel } from '../../../../board/CostPanel'
+import { ReviewPanel, findingCounts, type ReviewRow } from '../../../../board/ReviewPanel'
+import { boardFingerprint } from '../../../../board/fingerprint'
 
 const selectClass =
   'h-10 w-full rounded-md border border-input bg-transparent px-3 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring'
@@ -28,6 +30,8 @@ export default function BoardPage() {
   const boards = useQuery<BoardRow>('boards')
   const components = useQuery<ComponentRow>('components', { where: { boardId }, orderBy: 'createdAt', orderDir: 'asc' })
   const flows = useQuery<FlowRow>('flows', { where: { boardId }, orderBy: 'createdAt', orderDir: 'asc' })
+  // Only the latest review is shown, so only the latest is sent.
+  const reviews = useQuery<ReviewRow>('reviews', { where: { boardId }, orderBy: 'createdAt', orderDir: 'desc', limit: 1 })
   const boardMut = useMutations<BoardRow>('boards')
   const compMut = useMutations<ComponentRow>('components')
   const flowMut = useMutations<FlowRow>('flows')
@@ -39,10 +43,18 @@ export default function BoardPage() {
   // The live cost: recalculated in this browser whenever any synced record
   // changes. Every viewer has the same records and the same price snapshot,
   // so every viewer sees the same numbers, and nothing is stored.
-  const cost = useMemo(() => {
-    const { prices, workload } = boardToPrices(boardFromRecords(board, components.records, flows.records))
-    return compute(prices, workload)
+  const { cost, fingerprint } = useMemo(() => {
+    const shaped = boardFromRecords(board, components.records, flows.records)
+    const { prices, workload } = boardToPrices(shaped)
+    // The fingerprint tells the review panel whether the board changed since the last review.
+    return { cost: compute(prices, workload), fingerprint: boardFingerprint(shaped) }
   }, [board, components.records, flows.records])
+  const latestReview = reviews.records[0]
+  const counts = findingCounts(latestReview?.data.findings)
+  const labelOf = (id: string) =>
+    id === 'internet-egress'
+      ? 'Internet egress'
+      : components.records.find((c) => c.recordId === id)?.data.label || '(removed component)'
 
   if (boards.status === 'loading') return <p className="p-6 text-sm text-muted-foreground">Loading board…</p>
   if (!board) {
@@ -95,6 +107,10 @@ export default function BoardPage() {
         <CostPanel result={cost} />
       </div>
 
+      <div className="mt-6">
+        <ReviewPanel boardId={boardId} review={latestReview} currentFingerprint={fingerprint} labelOf={labelOf} />
+      </div>
+
       <section className="mt-6">
         <h2 className="mb-2 text-sm font-medium text-muted-foreground">Add a component</h2>
         <div className="flex flex-wrap gap-2">
@@ -126,8 +142,18 @@ export default function BoardPage() {
                       c.recordId === selectedId ? 'border-primary ring-1 ring-primary' : 'border-border'
                     }`}
                   >
-                    <div className="text-xs uppercase tracking-wide text-muted-foreground">
-                      {LABEL[c.data.type as ComponentType] ?? c.data.type}
+                    <div className="flex items-center justify-between text-xs uppercase tracking-wide text-muted-foreground">
+                      <span>{LABEL[c.data.type as ComponentType] ?? c.data.type}</span>
+                      {counts.get(c.recordId) && (
+                        <span
+                          title="Findings in the latest AI review"
+                          className={`rounded px-1.5 py-0.5 normal-case tracking-normal ${
+                            counts.get(c.recordId)!.high ? 'bg-red-500/15 text-red-600 dark:text-red-400' : 'bg-amber-500/15 text-amber-700 dark:text-amber-400'
+                          }`}
+                        >
+                          {counts.get(c.recordId)!.total} finding{counts.get(c.recordId)!.total === 1 ? '' : 's'}
+                        </span>
+                      )}
                     </div>
                     <div className="font-medium">{c.data.label || '(unnamed)'}</div>
                     <div className="mt-1 text-xs text-muted-foreground">{sizingSummary(c.data)}</div>

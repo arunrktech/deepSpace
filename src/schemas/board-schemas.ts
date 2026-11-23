@@ -66,3 +66,26 @@ export const flowsSchema: CollectionSchema = {
   ],
   permissions: teamEditable,
 }
+
+/**
+ * AI reviews of a board. Members can read them, but nobody can create or edit
+ * one from the browser: only the reviewBoard server action writes them
+ * (actions run as the app). Otherwise anyone could post a fake "AI review".
+ * Same reasoning as DeepSpace's own ai-messages schema (docs: guides/ai-chat).
+ */
+export const reviewsSchema: CollectionSchema = {
+  name: 'reviews',
+  columns: [
+    { ...text('boardId'), required: true },
+    text('requestedBy'),
+    text('model'),
+    text('summary'),
+    { name: 'findings', storage: 'text', interpretation: { kind: 'json' } },
+    { name: 'totals', storage: 'text', interpretation: { kind: 'json' } },
+    text('fingerprint'),
+  ],
+  permissions: {
+    member: { read: true, create: false, update: false, delete: false },
+    admin: { read: true, create: false, update: false, delete: true },
+  },
+}

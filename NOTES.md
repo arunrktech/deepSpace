@@ -275,3 +275,62 @@ Take-home due **Wed Nov 25, 11:59 PM ET**.
 
 **What the owner verified:**
 - [ ] Open "Cost check" in two windows, change a size, and watch the totals move in both
+
+---
+
+## Step 7: AI reviewer (2026-11-23)
+
+**DeepSpace docs read** (Markdown):
+- https://docs.deep.space/guides/ai-chat: custom tools with Zod input schemas, the model catalog, who pays, and why `ai-messages` can't be created from the browser
+- https://docs.deep.space/sdk-reference/worker/ai: `createDeepSpaceAI` (`authToken` passed = the caller pays), the agent-runner limits
+- https://docs.deep.space/guides/server-actions: actions run as the app and bypass RBAC; the caller's JWT is verified and passed as `callerJwt`; `tools.get`, `query` and `create`
+
+I also read the starter's `src/ai/agent.ts`, `tools.ts` and `chat-routes.ts`, which is where the membership check comes from.
+
+**Files:**
+- `src/ai/review/reviewData.ts` (+ test): tool outputs, the review schema, `cleanReview`, the prompt. Pure.
+- `src/actions/reviewBoard.ts`: the server action, registered in `src/actions/index.ts`.
+- `src/board/fingerprint.ts`: a hash of the board's content.
+- `src/board/ReviewPanel.tsx`: the panel, plus finding-count badges on the component cards in `[boardId].tsx`.
+- A `reviews` collection in `src/schemas/board-schemas.ts`.
+
+**How it works:**
+1. "Review board" sends `POST /api/actions/reviewBoard {boardId}`. The route verifies the JWT, and unauthenticated calls get **401** (checked with curl).
+2. The action checks app membership with `resolveAppMembership`, because actions bypass RBAC. It then reads the board, components and flows, ordered oldest first exactly as the page does, and runs the same cost engine.
+3. `generateText` runs with `createDeepSpaceAI(env, 'anthropic', { authToken: callerJwt })('claude-sonnet-5-5')`, so **whoever clicks pays**. It has three tools:
+   - `get_board`: components with sizing marked stated or default, and flows by label.
+   - `get_costs`: per-component cloud costs, commitment costs, spreads and line notes.
+   - `submit_review`: a Zod schema of summary plus findings `{componentId, category cost|reliability, severity high|medium|low, title, detail, suggestion}`.
+   The run stops at `hasToolCall('submit_review')` or 6 steps, with `maxOutputTokens: 6000`.
+4. `cleanReview` drops findings for unknown component ids and duplicates, and sorts high → low.
+5. The action writes a `reviews` record with the summary, findings, totals at review time, and the board fingerprint.
+6. The page queries the latest review (`limit: 1`). Everyone sees it live, and cards show finding counts. If the live board's fingerprint differs from the review's, the panel shows "Board changed since this review".
+
+**Decisions and tradeoffs:**
+- **A button, not a chat.** The brief wants findings *per component*, visible to the team. The starter's chat is private per user (`read: 'own'`) and free text. A chat could reuse these tools later.
+- **The model must read through tools**; the board is never pasted into the prompt. That's the brief's "reads the board via tools", and it keeps the prompt fixed.
+- **Read-only reviewer.** It has no tool that writes records. Labels are user-typed, so the prompt and the `get_board` output both say to treat them as data. A prompt injection on the board could at most change what the review says, never the board itself.
+- **Reviews can't be forged:** members have `create/update: false` on `reviews`. Only the action (running as the app) writes them. The same reasoning as DeepSpace's own `ai-messages` schema.
+- **Sonnet 5.5, not the default Opus 5.5:** faster and cheaper per click. It's a one-line change in `REVIEW_MODEL`. Billed to the caller via their JWT, not the owner.
+- **Fingerprint:** FNV-1a over the board JSON, built the same way on server and client. It detects edits; it isn't for security.
+
+**What the agent did:**
+- Results: `vitest run` gives **169/169** passing (10 new), and `tsc` and `eslint` are clean.
+- Restarted the dev server for the new schema. Unauthenticated action call → 401.
+- **Bug found in the live run:** the first click failed with `tool_choice: type "tool" and "any" are not supported for this model` because I had set `toolChoice: 'required'`. The provider rejected the request before generating anything, so it should not have used model credits (not checked against the billing page). Fixed by removing it; the prompt plus the "no submit_review → clear error" check cover the same need. The error toast had closed before I looked, so I found it in the dev server log.
+- **Live review on "Cost check"** (Service 1: 2 × 4 vCPU; Object storage 1: 500 GB; Database 1: 2 vCPU, HA turned off; flow Service 1 → Database 1; egress 200 GB), started from tab A, with tab B open:
+  - The review appeared in **tab B** live, from `claude-sonnet-5-5`, with 6 findings:
+    - high reliability: the database has no HA;
+    - high cost: always-on compute with no commitment;
+    - high reliability, whole board: no load balancer in front of 2 instances;
+    - low: the database's spread between clouds and commitment savings;
+    - low: object storage not connected to anything;
+    - low: egress spread on GCP.
+  - **The numbers came from the tools and are correct.** For example, the DB on AWS is $141.44 = 730 × $0.178 + 100 × $0.115, and its commitment price is $98.37 = 730 × $0.119 + $11.50. The review also told stated values apart from defaults.
+  - Cards showed "2 findings" on the database and "1 finding" on the service and on storage.
+  - Changing egress to 250 in tab B made tab A show "Board changed since this review". No console errors.
+- **Not tested live:** that a browser *can't* create a `reviews` record. That rests on the schema (`create: false`), which the docs say is enforced on the server, but I didn't try a forged write.
+
+**What the owner verified:**
+- [ ] Read the review on "Cost check" and judge whether the findings are sensible
+- [ ] Decide: keep Sonnet 5.5 and caller-pays, or switch
