@@ -42,3 +42,42 @@ Take-home due **Wed Nov 25, 11:59 PM ET**.
 **What the owner verified:**
 - [x] Logged in with `npx deepspace auth login`
 - [ ] `http://localhost:5173` loads the starter app (the agent checked this; the owner hasn't yet)
+
+---
+
+## Step 2: Baseline commit, then port the cost model to TypeScript (2026-11-23)
+
+**Docs read:** none needed. This step is plain TypeScript with no DeepSpace features; it uses the starter's existing vitest setup (`vitest.config.ts` runs `src/**/*.test.ts`).
+
+**Source ported:** `scripts/cost_model.py` and `references/workload_schema.md` from github.com/arunrktech/cloud-cost-comparator at commit `c142d6d` (2026-11-06).
+
+**Files:**
+- `src/cost/types.ts`: types for workload.json, prices.json, and the costs.json result.
+- `src/cost/pyMath.ts`: `pyRound` and `pySum`, which behave like Python's `round()` and `sum()`.
+- `src/cost/costModel.ts`: `officialUrl`, `validate`, `compute`, ported line for line with the same names.
+- `src/cost/*.test.ts` and `src/cost/__fixtures__/`: the example workload and prices files, plus the golden output.
+- `scripts/make-cost-golden.py`: runs the original Python model to regenerate the golden output.
+
+**Decisions and tradeoffs:**
+- **Kept snake_case field names** (`unit_price`, `like_for_like`, …). They are the original tool's file formats, so JSON moves between the Python tool and this app unchanged. The cost is that it isn't idiomatic TypeScript.
+- **Kept the same function names and order as the Python**, so a reviewer can read the two files side by side.
+- **Dropped the CLI** (argparse, file I/O, printing) because the app passes objects in and gets an object back. So the Python `FriendlyErrors` tests weren't ported; they only test CLI file handling.
+- **Rounding (`pyRound`).** Python's `round()` rounds the exact binary value and breaks exact ties to the even digit (`round(0.125, 2) == 0.12`). `Math.round(x*100)/100` rounds ties up, and `x*100` is itself inexact (`1.005*100 = 100.4999…`). `toFixed()` already rounds the exact binary value, so `pyRound` uses it and handles only the exact-tie case itself.
+- **Summing (`pySum`).** Since Python 3.12, `sum()` of floats uses compensated (Neumaier) summation: `sum([0.1, 0.2, 0.3]) == 0.6`, but a plain JS loop gives `0.6000000000000001`. One bit can move a value across a rounding boundary, so the port matches it. The Python's own `+=` accumulations stay plain `+=`.
+- **Ties between clouds.** Python's `min(d, key=d.get)` returns the first smallest key, so the port walks clouds in AWS, GCP, Azure order to break ties the same way.
+- **Two sort orders preserved exactly.** `gaps_on` is sorted alphabetically (aws, azure, gcp) because the Python uses `sorted()`. `incomplete_clouds` follows CLOUDS order (aws, gcp, azure).
+- **URL check.** The scheme is checked before parsing, so a bare `aws.amazon.com/...` gets the same "must start with https://" message as Python. After that, WHATWG `new URL()` stands in for `urlparse`. All ten look-alike and credential-trick URLs from the Python tests are rejected, and all eight official ones are accepted.
+- **Faithful, not improved.** Like the Python, `validate` accepts `NaN` and `Infinity` as prices. Our own price snapshot will never contain them; we can tighten this later if board input ever reaches `validate`.
+
+**Testing approach: golden tests.** `scripts/make-cost-golden.py` runs the original `cost_model.compute()` (Python 3.14.5) on the example and three variants (AWS web unpriced, GCP web partly unpriced, Azure files missing with no workload) and saves the results. The TypeScript `compute()` output must deep-equal each one. On top of that, every Python test except the CLI ones is ported by name.
+
+**What the agent did:**
+- Checked that `.gitignore` covers `.dev.vars` (secrets), `.deepspace/` and `node_modules`, then committed the untouched scaffold as `e18a718` (local `main` only, not pushed). Git printed LF→CRLF warnings because the global `core.autocrlf` is on; they're harmless.
+- Ran Python to confirm the behaviours above: `round(0.125,2)=0.12`, `round(2.675,2)=2.67`, `sum([0.1,0.2,0.3])=0.6`, `sum([1e16,1,-1e16])=1.0`.
+- Results: `vitest run` gives 47/47 passing (44 new: 12 for `pyMath`, 4 golden, 24 ported from Python, 4 extra `validate` checks; plus the starter's 3), `tsc --noEmit` is clean, and `eslint src/cost` is clean.
+- The type-check caught one problem: a JSON import's inferred type didn't match `Workload`. It was fixed by casting the fixtures through `unknown`, since they are untyped data like a file read from disk.
+- Example on-demand totals match the original: **AWS $167.67, GCP $173.46, Azure $159.26 (Azure cheapest)**.
+
+**What the owner verified:**
+- [ ] Read `costModel.ts` side by side with `cost_model.py`
+- [ ] Ran `npm run test:unit` yourself

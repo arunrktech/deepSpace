@@ -1,0 +1,1574 @@
+{
+ "example": {
+  "currency": "USD",
+  "retrieved": "2026-11-05",
+  "complete": true,
+  "warnings": [],
+  "variance": {
+   "ondemand": {
+    "scenario": "ondemand",
+    "complete": true,
+    "totals": {
+     "aws": 167.67,
+     "gcp": 173.46,
+     "azure": 159.26
+    },
+    "annual": {
+     "aws": 2012.04,
+     "gcp": 2081.52,
+     "azure": 1911.12
+    },
+    "cheapest": "azure",
+    "vs_cheapest": {
+     "aws": {
+      "usd": 8.41,
+      "pct": 5.3
+     },
+     "gcp": {
+      "usd": 14.2,
+      "pct": 8.9
+     },
+     "azure": {
+      "usd": 0.0,
+      "pct": 0.0
+     }
+    },
+    "incomplete_clouds": [],
+    "like_for_like": {
+     "components": [
+      "web",
+      "files",
+      "egress"
+     ],
+     "excluded_components": [],
+     "totals": {
+      "aws": 167.67,
+      "gcp": 173.46,
+      "azure": 159.26
+     },
+     "cheapest": "azure",
+     "vs_cheapest": {
+      "aws": {
+       "usd": 8.41,
+       "pct": 5.3
+      },
+      "gcp": {
+       "usd": 14.2,
+       "pct": 8.9
+      },
+      "azure": {
+       "usd": 0.0,
+       "pct": 0.0
+      }
+     }
+    }
+   },
+   "commit": {
+    "scenario": "commit",
+    "complete": true,
+    "totals": {
+     "aws": 117.85,
+     "gcp": 120.99,
+     "azure": 105.6
+    },
+    "annual": {
+     "aws": 1414.2,
+     "gcp": 1451.88,
+     "azure": 1267.2
+    },
+    "cheapest": "azure",
+    "vs_cheapest": {
+     "aws": {
+      "usd": 12.25,
+      "pct": 11.6
+     },
+     "gcp": {
+      "usd": 15.39,
+      "pct": 14.6
+     },
+     "azure": {
+      "usd": 0.0,
+      "pct": 0.0
+     }
+    },
+    "incomplete_clouds": [],
+    "like_for_like": {
+     "components": [
+      "web",
+      "files",
+      "egress"
+     ],
+     "excluded_components": [],
+     "totals": {
+      "aws": 117.85,
+      "gcp": 120.99,
+      "azure": 105.6
+     },
+     "cheapest": "azure",
+     "vs_cheapest": {
+      "aws": {
+       "usd": 12.25,
+       "pct": 11.6
+      },
+      "gcp": {
+       "usd": 15.39,
+       "pct": 14.6
+      },
+      "azure": {
+       "usd": 0.0,
+       "pct": 0.0
+      }
+     }
+    }
+   }
+  },
+  "components": [
+   {
+    "component": "web",
+    "label": "Web servers",
+    "comparable": true,
+    "gaps_on": [],
+    "ondemand": {
+     "aws": 147.17,
+     "gcp": 141.79,
+     "azure": 140.16
+    },
+    "ondemand_cheapest": "azure",
+    "ondemand_spread_usd": 7.01,
+    "commit": {
+     "aws": 97.35,
+     "gcp": 89.33,
+     "azure": 86.5
+    },
+    "commit_cheapest": "azure",
+    "commit_spread_usd": 10.85
+   },
+   {
+    "component": "files",
+    "label": "File storage",
+    "comparable": true,
+    "gaps_on": [],
+    "ondemand": {
+     "aws": 11.5,
+     "gcp": 9.31,
+     "azure": 10.4
+    },
+    "ondemand_cheapest": "gcp",
+    "ondemand_spread_usd": 2.19,
+    "commit": {
+     "aws": 11.5,
+     "gcp": 9.31,
+     "azure": 10.4
+    },
+    "commit_cheapest": "gcp",
+    "commit_spread_usd": 2.19
+   },
+   {
+    "component": "egress",
+    "label": "Internet egress",
+    "comparable": true,
+    "gaps_on": [],
+    "ondemand": {
+     "aws": 9.0,
+     "gcp": 22.35,
+     "azure": 8.7
+    },
+    "ondemand_cheapest": "azure",
+    "ondemand_spread_usd": 13.65,
+    "commit": {
+     "aws": 9.0,
+     "gcp": 22.35,
+     "azure": 8.7
+    },
+    "commit_cheapest": "azure",
+    "commit_spread_usd": 13.65
+   }
+  ],
+  "top_variance_drivers": [
+   {
+    "component": "egress",
+    "label": "Internet egress",
+    "spread_usd": 13.65,
+    "share_of_component_spread_pct": 59.7
+   },
+   {
+    "component": "web",
+    "label": "Web servers",
+    "spread_usd": 7.01,
+    "share_of_component_spread_pct": 30.7
+   },
+   {
+    "component": "files",
+    "label": "File storage",
+    "spread_usd": 2.19,
+    "share_of_component_spread_pct": 9.6
+   }
+  ],
+  "lines": [
+   {
+    "cloud": "aws",
+    "component": "web",
+    "item": "EC2 m7i.large Linux, shared, on demand",
+    "unit": "hour",
+    "unit_price": 0.1008,
+    "quantity": 1460,
+    "monthly_ondemand": 147.168,
+    "commit_unit_price": 0.06668,
+    "monthly_commit": 97.3528,
+    "commit_label": "1 year Reserved standard, no upfront",
+    "source": "api",
+    "url": "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonEC2/current/us-east-1/index.csv",
+    "retrieved": "2026-11-05",
+    "note": "2 instances x 730 hours"
+   },
+   {
+    "cloud": "aws",
+    "component": "files",
+    "item": "S3 Standard storage, first 50 TB tier",
+    "unit": "GB-month",
+    "unit_price": 0.023,
+    "quantity": 500,
+    "monthly_ondemand": 11.5,
+    "commit_unit_price": null,
+    "monthly_commit": 11.5,
+    "commit_label": "",
+    "source": "api",
+    "url": "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonS3/current/us-east-1/index.csv",
+    "retrieved": "2026-11-05",
+    "note": "500 GB"
+   },
+   {
+    "cloud": "aws",
+    "component": "egress",
+    "item": "Data transfer out to internet, first 10 TB tier",
+    "unit": "GB",
+    "unit_price": 0.09,
+    "quantity": 100,
+    "monthly_ondemand": 9.0,
+    "commit_unit_price": null,
+    "monthly_commit": 9.0,
+    "commit_label": "",
+    "source": "api",
+    "url": "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSDataTransfer/current/us-east-1/index.csv",
+    "retrieved": "2026-11-05",
+    "note": "200 GB minus 100 GB monthly free allowance across AWS"
+   },
+   {
+    "cloud": "gcp",
+    "component": "web",
+    "item": "n2-standard-2 on demand (Iowa)",
+    "unit": "hour",
+    "unit_price": 0.097118,
+    "quantity": 1460,
+    "monthly_ondemand": 141.7923,
+    "commit_unit_price": 0.061182,
+    "monthly_commit": 89.3257,
+    "commit_label": "1 year resource based committed use",
+    "source": "page",
+    "url": "https://cloud.google.com/products/compute/pricing/general-purpose",
+    "retrieved": "2026-11-05",
+    "note": "2 instances x 730 hours; page showed Iowa (us-central1)"
+   },
+   {
+    "cloud": "gcp",
+    "component": "files",
+    "item": "Cloud Storage Standard, regional (Iowa)",
+    "unit": "GiB-month",
+    "unit_price": 0.02,
+    "quantity": 465.66,
+    "monthly_ondemand": 9.3132,
+    "commit_unit_price": null,
+    "monthly_commit": 9.3132,
+    "commit_label": "",
+    "source": "page",
+    "url": "https://cloud.google.com/storage/pricing",
+    "retrieved": "2026-11-05",
+    "note": "$0.000027397 per GiB hour x 730 = $0.0200 per GiB month; 500 GB = 465.66 GiB"
+   },
+   {
+    "cloud": "gcp",
+    "component": "egress",
+    "item": "Internet egress, Premium tier, 0 to 10 TiB",
+    "unit": "GiB",
+    "unit_price": 0.12,
+    "quantity": 186.26,
+    "monthly_ondemand": 22.3512,
+    "commit_unit_price": null,
+    "monthly_commit": 22.3512,
+    "commit_label": "",
+    "source": "page",
+    "url": "https://cloud.google.com/storage/pricing",
+    "retrieved": "2026-11-05",
+    "note": "200 GB = 186.26 GiB; worldwide destinations excluding Asia and Australia"
+   },
+   {
+    "cloud": "azure",
+    "component": "web",
+    "item": "D2s v5 Linux pay as you go",
+    "unit": "hour",
+    "unit_price": 0.096,
+    "quantity": 1460,
+    "monthly_ondemand": 140.16,
+    "commit_unit_price": 0.059247,
+    "monthly_commit": 86.5006,
+    "commit_label": "1 year reservation ($519 per term / 8,760 h)",
+    "source": "api",
+    "url": "https://prices.azure.com/api/retail/prices",
+    "retrieved": "2026-11-05",
+    "note": "2 instances x 730 hours"
+   },
+   {
+    "cloud": "azure",
+    "component": "files",
+    "item": "Block Blob Hot LRS data stored, first 50 TB",
+    "unit": "GB-month",
+    "unit_price": 0.0208,
+    "quantity": 500,
+    "monthly_ondemand": 10.4,
+    "commit_unit_price": null,
+    "monthly_commit": 10.4,
+    "commit_label": "",
+    "source": "api",
+    "url": "https://prices.azure.com/api/retail/prices",
+    "retrieved": "2026-11-05",
+    "note": "500 GB"
+   },
+   {
+    "cloud": "azure",
+    "component": "egress",
+    "item": "Standard data transfer out, Microsoft network routing",
+    "unit": "GB",
+    "unit_price": 0.087,
+    "quantity": 100,
+    "monthly_ondemand": 8.7,
+    "commit_unit_price": null,
+    "monthly_commit": 8.7,
+    "commit_label": "",
+    "source": "api",
+    "url": "https://prices.azure.com/api/retail/prices",
+    "retrieved": "2026-11-05",
+    "note": "200 GB; first 100 GB per month priced at $0 by the API, next tier $0.087"
+   }
+  ],
+  "unpriced": [],
+  "sources": [
+   {
+    "cloud": "aws",
+    "url": "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonEC2/current/us-east-1/index.csv",
+    "retrieved": "2026-11-05",
+    "source": "api",
+    "items": [
+     "EC2 m7i.large Linux, shared, on demand"
+    ]
+   },
+   {
+    "cloud": "aws",
+    "url": "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonS3/current/us-east-1/index.csv",
+    "retrieved": "2026-11-05",
+    "source": "api",
+    "items": [
+     "S3 Standard storage, first 50 TB tier"
+    ]
+   },
+   {
+    "cloud": "aws",
+    "url": "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSDataTransfer/current/us-east-1/index.csv",
+    "retrieved": "2026-11-05",
+    "source": "api",
+    "items": [
+     "Data transfer out to internet, first 10 TB tier"
+    ]
+   },
+   {
+    "cloud": "gcp",
+    "url": "https://cloud.google.com/products/compute/pricing/general-purpose",
+    "retrieved": "2026-11-05",
+    "source": "page",
+    "items": [
+     "n2-standard-2 on demand (Iowa)"
+    ]
+   },
+   {
+    "cloud": "gcp",
+    "url": "https://cloud.google.com/storage/pricing",
+    "retrieved": "2026-11-05",
+    "source": "page",
+    "items": [
+     "Cloud Storage Standard, regional (Iowa)",
+     "Internet egress, Premium tier, 0 to 10 TiB"
+    ]
+   },
+   {
+    "cloud": "azure",
+    "url": "https://prices.azure.com/api/retail/prices",
+    "retrieved": "2026-11-05",
+    "source": "api",
+    "items": [
+     "D2s v5 Linux pay as you go",
+     "Block Blob Hot LRS data stored, first 50 TB",
+     "Standard data transfer out, Microsoft network routing"
+    ]
+   }
+  ],
+  "source_mix": {
+   "api": 6,
+   "page": 3
+  }
+ },
+ "aws-web-unpriced": {
+  "currency": "USD",
+  "retrieved": "2026-11-05",
+  "complete": false,
+  "warnings": [
+   "No overall cheapest cloud declared: 1 component(s) are not priced on every cloud (Web servers on AWS). Totals are incomplete; the like for like comparison covers 2 of 3 components."
+  ],
+  "variance": {
+   "ondemand": {
+    "scenario": "ondemand",
+    "complete": false,
+    "totals": {
+     "aws": 20.5,
+     "gcp": 173.46,
+     "azure": 159.26
+    },
+    "annual": {
+     "aws": 246.0,
+     "gcp": 2081.52,
+     "azure": 1911.12
+    },
+    "cheapest": null,
+    "vs_cheapest": null,
+    "incomplete_clouds": [
+     "aws"
+    ],
+    "like_for_like": {
+     "components": [
+      "files",
+      "egress"
+     ],
+     "excluded_components": [
+      "web"
+     ],
+     "totals": {
+      "aws": 20.5,
+      "gcp": 31.66,
+      "azure": 19.1
+     },
+     "cheapest": "azure",
+     "vs_cheapest": {
+      "aws": {
+       "usd": 1.4,
+       "pct": 7.3
+      },
+      "gcp": {
+       "usd": 12.56,
+       "pct": 65.8
+      },
+      "azure": {
+       "usd": 0.0,
+       "pct": 0.0
+      }
+     }
+    }
+   },
+   "commit": {
+    "scenario": "commit",
+    "complete": false,
+    "totals": {
+     "aws": 20.5,
+     "gcp": 120.99,
+     "azure": 105.6
+    },
+    "annual": {
+     "aws": 246.0,
+     "gcp": 1451.88,
+     "azure": 1267.2
+    },
+    "cheapest": null,
+    "vs_cheapest": null,
+    "incomplete_clouds": [
+     "aws"
+    ],
+    "like_for_like": {
+     "components": [
+      "files",
+      "egress"
+     ],
+     "excluded_components": [
+      "web"
+     ],
+     "totals": {
+      "aws": 20.5,
+      "gcp": 31.66,
+      "azure": 19.1
+     },
+     "cheapest": "azure",
+     "vs_cheapest": {
+      "aws": {
+       "usd": 1.4,
+       "pct": 7.3
+      },
+      "gcp": {
+       "usd": 12.56,
+       "pct": 65.8
+      },
+      "azure": {
+       "usd": 0.0,
+       "pct": 0.0
+      }
+     }
+    }
+   }
+  },
+  "components": [
+   {
+    "component": "web",
+    "label": "Web servers",
+    "comparable": false,
+    "gaps_on": [
+     "aws"
+    ],
+    "ondemand": {
+     "aws": 0.0,
+     "gcp": 141.79,
+     "azure": 140.16
+    },
+    "ondemand_cheapest": null,
+    "ondemand_spread_usd": null,
+    "commit": {
+     "aws": 0.0,
+     "gcp": 89.33,
+     "azure": 86.5
+    },
+    "commit_cheapest": null,
+    "commit_spread_usd": null
+   },
+   {
+    "component": "files",
+    "label": "File storage",
+    "comparable": true,
+    "gaps_on": [],
+    "ondemand": {
+     "aws": 11.5,
+     "gcp": 9.31,
+     "azure": 10.4
+    },
+    "ondemand_cheapest": "gcp",
+    "ondemand_spread_usd": 2.19,
+    "commit": {
+     "aws": 11.5,
+     "gcp": 9.31,
+     "azure": 10.4
+    },
+    "commit_cheapest": "gcp",
+    "commit_spread_usd": 2.19
+   },
+   {
+    "component": "egress",
+    "label": "Internet egress",
+    "comparable": true,
+    "gaps_on": [],
+    "ondemand": {
+     "aws": 9.0,
+     "gcp": 22.35,
+     "azure": 8.7
+    },
+    "ondemand_cheapest": "azure",
+    "ondemand_spread_usd": 13.65,
+    "commit": {
+     "aws": 9.0,
+     "gcp": 22.35,
+     "azure": 8.7
+    },
+    "commit_cheapest": "azure",
+    "commit_spread_usd": 13.65
+   }
+  ],
+  "top_variance_drivers": [
+   {
+    "component": "egress",
+    "label": "Internet egress",
+    "spread_usd": 13.65,
+    "share_of_component_spread_pct": 86.2
+   },
+   {
+    "component": "files",
+    "label": "File storage",
+    "spread_usd": 2.19,
+    "share_of_component_spread_pct": 13.8
+   }
+  ],
+  "lines": [
+   {
+    "cloud": "aws",
+    "component": "files",
+    "item": "S3 Standard storage, first 50 TB tier",
+    "unit": "GB-month",
+    "unit_price": 0.023,
+    "quantity": 500,
+    "monthly_ondemand": 11.5,
+    "commit_unit_price": null,
+    "monthly_commit": 11.5,
+    "commit_label": "",
+    "source": "api",
+    "url": "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonS3/current/us-east-1/index.csv",
+    "retrieved": "2026-11-05",
+    "note": "500 GB"
+   },
+   {
+    "cloud": "aws",
+    "component": "egress",
+    "item": "Data transfer out to internet, first 10 TB tier",
+    "unit": "GB",
+    "unit_price": 0.09,
+    "quantity": 100,
+    "monthly_ondemand": 9.0,
+    "commit_unit_price": null,
+    "monthly_commit": 9.0,
+    "commit_label": "",
+    "source": "api",
+    "url": "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSDataTransfer/current/us-east-1/index.csv",
+    "retrieved": "2026-11-05",
+    "note": "200 GB minus 100 GB monthly free allowance across AWS"
+   },
+   {
+    "cloud": "gcp",
+    "component": "web",
+    "item": "n2-standard-2 on demand (Iowa)",
+    "unit": "hour",
+    "unit_price": 0.097118,
+    "quantity": 1460,
+    "monthly_ondemand": 141.7923,
+    "commit_unit_price": 0.061182,
+    "monthly_commit": 89.3257,
+    "commit_label": "1 year resource based committed use",
+    "source": "page",
+    "url": "https://cloud.google.com/products/compute/pricing/general-purpose",
+    "retrieved": "2026-11-05",
+    "note": "2 instances x 730 hours; page showed Iowa (us-central1)"
+   },
+   {
+    "cloud": "gcp",
+    "component": "files",
+    "item": "Cloud Storage Standard, regional (Iowa)",
+    "unit": "GiB-month",
+    "unit_price": 0.02,
+    "quantity": 465.66,
+    "monthly_ondemand": 9.3132,
+    "commit_unit_price": null,
+    "monthly_commit": 9.3132,
+    "commit_label": "",
+    "source": "page",
+    "url": "https://cloud.google.com/storage/pricing",
+    "retrieved": "2026-11-05",
+    "note": "$0.000027397 per GiB hour x 730 = $0.0200 per GiB month; 500 GB = 465.66 GiB"
+   },
+   {
+    "cloud": "gcp",
+    "component": "egress",
+    "item": "Internet egress, Premium tier, 0 to 10 TiB",
+    "unit": "GiB",
+    "unit_price": 0.12,
+    "quantity": 186.26,
+    "monthly_ondemand": 22.3512,
+    "commit_unit_price": null,
+    "monthly_commit": 22.3512,
+    "commit_label": "",
+    "source": "page",
+    "url": "https://cloud.google.com/storage/pricing",
+    "retrieved": "2026-11-05",
+    "note": "200 GB = 186.26 GiB; worldwide destinations excluding Asia and Australia"
+   },
+   {
+    "cloud": "azure",
+    "component": "web",
+    "item": "D2s v5 Linux pay as you go",
+    "unit": "hour",
+    "unit_price": 0.096,
+    "quantity": 1460,
+    "monthly_ondemand": 140.16,
+    "commit_unit_price": 0.059247,
+    "monthly_commit": 86.5006,
+    "commit_label": "1 year reservation ($519 per term / 8,760 h)",
+    "source": "api",
+    "url": "https://prices.azure.com/api/retail/prices",
+    "retrieved": "2026-11-05",
+    "note": "2 instances x 730 hours"
+   },
+   {
+    "cloud": "azure",
+    "component": "files",
+    "item": "Block Blob Hot LRS data stored, first 50 TB",
+    "unit": "GB-month",
+    "unit_price": 0.0208,
+    "quantity": 500,
+    "monthly_ondemand": 10.4,
+    "commit_unit_price": null,
+    "monthly_commit": 10.4,
+    "commit_label": "",
+    "source": "api",
+    "url": "https://prices.azure.com/api/retail/prices",
+    "retrieved": "2026-11-05",
+    "note": "500 GB"
+   },
+   {
+    "cloud": "azure",
+    "component": "egress",
+    "item": "Standard data transfer out, Microsoft network routing",
+    "unit": "GB",
+    "unit_price": 0.087,
+    "quantity": 100,
+    "monthly_ondemand": 8.7,
+    "commit_unit_price": null,
+    "monthly_commit": 8.7,
+    "commit_label": "",
+    "source": "api",
+    "url": "https://prices.azure.com/api/retail/prices",
+    "retrieved": "2026-11-05",
+    "note": "200 GB; first 100 GB per month priced at $0 by the API, next tier $0.087"
+   }
+  ],
+  "unpriced": [
+   {
+    "cloud": "aws",
+    "component": "web",
+    "item": "EC2 m7i.large",
+    "source": "unpriced",
+    "note": "price not found"
+   }
+  ],
+  "sources": [
+   {
+    "cloud": "aws",
+    "url": "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonS3/current/us-east-1/index.csv",
+    "retrieved": "2026-11-05",
+    "source": "api",
+    "items": [
+     "S3 Standard storage, first 50 TB tier"
+    ]
+   },
+   {
+    "cloud": "aws",
+    "url": "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSDataTransfer/current/us-east-1/index.csv",
+    "retrieved": "2026-11-05",
+    "source": "api",
+    "items": [
+     "Data transfer out to internet, first 10 TB tier"
+    ]
+   },
+   {
+    "cloud": "gcp",
+    "url": "https://cloud.google.com/products/compute/pricing/general-purpose",
+    "retrieved": "2026-11-05",
+    "source": "page",
+    "items": [
+     "n2-standard-2 on demand (Iowa)"
+    ]
+   },
+   {
+    "cloud": "gcp",
+    "url": "https://cloud.google.com/storage/pricing",
+    "retrieved": "2026-11-05",
+    "source": "page",
+    "items": [
+     "Cloud Storage Standard, regional (Iowa)",
+     "Internet egress, Premium tier, 0 to 10 TiB"
+    ]
+   },
+   {
+    "cloud": "azure",
+    "url": "https://prices.azure.com/api/retail/prices",
+    "retrieved": "2026-11-05",
+    "source": "api",
+    "items": [
+     "D2s v5 Linux pay as you go",
+     "Block Blob Hot LRS data stored, first 50 TB",
+     "Standard data transfer out, Microsoft network routing"
+    ]
+   }
+  ],
+  "source_mix": {
+   "api": 5,
+   "page": 3
+  }
+ },
+ "gcp-partial": {
+  "currency": "USD",
+  "retrieved": "2026-11-05",
+  "complete": false,
+  "warnings": [
+   "No overall cheapest cloud declared: 1 component(s) are not priced on every cloud (Web servers on Google Cloud). Totals are incomplete; the like for like comparison covers 2 of 3 components."
+  ],
+  "variance": {
+   "ondemand": {
+    "scenario": "ondemand",
+    "complete": false,
+    "totals": {
+     "aws": 167.67,
+     "gcp": 173.46,
+     "azure": 159.26
+    },
+    "annual": {
+     "aws": 2012.04,
+     "gcp": 2081.52,
+     "azure": 1911.12
+    },
+    "cheapest": null,
+    "vs_cheapest": null,
+    "incomplete_clouds": [
+     "gcp"
+    ],
+    "like_for_like": {
+     "components": [
+      "files",
+      "egress"
+     ],
+     "excluded_components": [
+      "web"
+     ],
+     "totals": {
+      "aws": 20.5,
+      "gcp": 31.66,
+      "azure": 19.1
+     },
+     "cheapest": "azure",
+     "vs_cheapest": {
+      "aws": {
+       "usd": 1.4,
+       "pct": 7.3
+      },
+      "gcp": {
+       "usd": 12.56,
+       "pct": 65.8
+      },
+      "azure": {
+       "usd": 0.0,
+       "pct": 0.0
+      }
+     }
+    }
+   },
+   "commit": {
+    "scenario": "commit",
+    "complete": false,
+    "totals": {
+     "aws": 117.85,
+     "gcp": 120.99,
+     "azure": 105.6
+    },
+    "annual": {
+     "aws": 1414.2,
+     "gcp": 1451.88,
+     "azure": 1267.2
+    },
+    "cheapest": null,
+    "vs_cheapest": null,
+    "incomplete_clouds": [
+     "gcp"
+    ],
+    "like_for_like": {
+     "components": [
+      "files",
+      "egress"
+     ],
+     "excluded_components": [
+      "web"
+     ],
+     "totals": {
+      "aws": 20.5,
+      "gcp": 31.66,
+      "azure": 19.1
+     },
+     "cheapest": "azure",
+     "vs_cheapest": {
+      "aws": {
+       "usd": 1.4,
+       "pct": 7.3
+      },
+      "gcp": {
+       "usd": 12.56,
+       "pct": 65.8
+      },
+      "azure": {
+       "usd": 0.0,
+       "pct": 0.0
+      }
+     }
+    }
+   }
+  },
+  "components": [
+   {
+    "component": "web",
+    "label": "Web servers",
+    "comparable": false,
+    "gaps_on": [
+     "gcp"
+    ],
+    "ondemand": {
+     "aws": 147.17,
+     "gcp": 141.79,
+     "azure": 140.16
+    },
+    "ondemand_cheapest": null,
+    "ondemand_spread_usd": null,
+    "commit": {
+     "aws": 97.35,
+     "gcp": 89.33,
+     "azure": 86.5
+    },
+    "commit_cheapest": null,
+    "commit_spread_usd": null
+   },
+   {
+    "component": "files",
+    "label": "File storage",
+    "comparable": true,
+    "gaps_on": [],
+    "ondemand": {
+     "aws": 11.5,
+     "gcp": 9.31,
+     "azure": 10.4
+    },
+    "ondemand_cheapest": "gcp",
+    "ondemand_spread_usd": 2.19,
+    "commit": {
+     "aws": 11.5,
+     "gcp": 9.31,
+     "azure": 10.4
+    },
+    "commit_cheapest": "gcp",
+    "commit_spread_usd": 2.19
+   },
+   {
+    "component": "egress",
+    "label": "Internet egress",
+    "comparable": true,
+    "gaps_on": [],
+    "ondemand": {
+     "aws": 9.0,
+     "gcp": 22.35,
+     "azure": 8.7
+    },
+    "ondemand_cheapest": "azure",
+    "ondemand_spread_usd": 13.65,
+    "commit": {
+     "aws": 9.0,
+     "gcp": 22.35,
+     "azure": 8.7
+    },
+    "commit_cheapest": "azure",
+    "commit_spread_usd": 13.65
+   }
+  ],
+  "top_variance_drivers": [
+   {
+    "component": "egress",
+    "label": "Internet egress",
+    "spread_usd": 13.65,
+    "share_of_component_spread_pct": 86.2
+   },
+   {
+    "component": "files",
+    "label": "File storage",
+    "spread_usd": 2.19,
+    "share_of_component_spread_pct": 13.8
+   }
+  ],
+  "lines": [
+   {
+    "cloud": "aws",
+    "component": "web",
+    "item": "EC2 m7i.large Linux, shared, on demand",
+    "unit": "hour",
+    "unit_price": 0.1008,
+    "quantity": 1460,
+    "monthly_ondemand": 147.168,
+    "commit_unit_price": 0.06668,
+    "monthly_commit": 97.3528,
+    "commit_label": "1 year Reserved standard, no upfront",
+    "source": "api",
+    "url": "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonEC2/current/us-east-1/index.csv",
+    "retrieved": "2026-11-05",
+    "note": "2 instances x 730 hours"
+   },
+   {
+    "cloud": "aws",
+    "component": "files",
+    "item": "S3 Standard storage, first 50 TB tier",
+    "unit": "GB-month",
+    "unit_price": 0.023,
+    "quantity": 500,
+    "monthly_ondemand": 11.5,
+    "commit_unit_price": null,
+    "monthly_commit": 11.5,
+    "commit_label": "",
+    "source": "api",
+    "url": "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonS3/current/us-east-1/index.csv",
+    "retrieved": "2026-11-05",
+    "note": "500 GB"
+   },
+   {
+    "cloud": "aws",
+    "component": "egress",
+    "item": "Data transfer out to internet, first 10 TB tier",
+    "unit": "GB",
+    "unit_price": 0.09,
+    "quantity": 100,
+    "monthly_ondemand": 9.0,
+    "commit_unit_price": null,
+    "monthly_commit": 9.0,
+    "commit_label": "",
+    "source": "api",
+    "url": "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSDataTransfer/current/us-east-1/index.csv",
+    "retrieved": "2026-11-05",
+    "note": "200 GB minus 100 GB monthly free allowance across AWS"
+   },
+   {
+    "cloud": "gcp",
+    "component": "web",
+    "item": "n2-standard-2 on demand (Iowa)",
+    "unit": "hour",
+    "unit_price": 0.097118,
+    "quantity": 1460,
+    "monthly_ondemand": 141.7923,
+    "commit_unit_price": 0.061182,
+    "monthly_commit": 89.3257,
+    "commit_label": "1 year resource based committed use",
+    "source": "page",
+    "url": "https://cloud.google.com/products/compute/pricing/general-purpose",
+    "retrieved": "2026-11-05",
+    "note": "2 instances x 730 hours; page showed Iowa (us-central1)"
+   },
+   {
+    "cloud": "gcp",
+    "component": "files",
+    "item": "Cloud Storage Standard, regional (Iowa)",
+    "unit": "GiB-month",
+    "unit_price": 0.02,
+    "quantity": 465.66,
+    "monthly_ondemand": 9.3132,
+    "commit_unit_price": null,
+    "monthly_commit": 9.3132,
+    "commit_label": "",
+    "source": "page",
+    "url": "https://cloud.google.com/storage/pricing",
+    "retrieved": "2026-11-05",
+    "note": "$0.000027397 per GiB hour x 730 = $0.0200 per GiB month; 500 GB = 465.66 GiB"
+   },
+   {
+    "cloud": "gcp",
+    "component": "egress",
+    "item": "Internet egress, Premium tier, 0 to 10 TiB",
+    "unit": "GiB",
+    "unit_price": 0.12,
+    "quantity": 186.26,
+    "monthly_ondemand": 22.3512,
+    "commit_unit_price": null,
+    "monthly_commit": 22.3512,
+    "commit_label": "",
+    "source": "page",
+    "url": "https://cloud.google.com/storage/pricing",
+    "retrieved": "2026-11-05",
+    "note": "200 GB = 186.26 GiB; worldwide destinations excluding Asia and Australia"
+   },
+   {
+    "cloud": "azure",
+    "component": "web",
+    "item": "D2s v5 Linux pay as you go",
+    "unit": "hour",
+    "unit_price": 0.096,
+    "quantity": 1460,
+    "monthly_ondemand": 140.16,
+    "commit_unit_price": 0.059247,
+    "monthly_commit": 86.5006,
+    "commit_label": "1 year reservation ($519 per term / 8,760 h)",
+    "source": "api",
+    "url": "https://prices.azure.com/api/retail/prices",
+    "retrieved": "2026-11-05",
+    "note": "2 instances x 730 hours"
+   },
+   {
+    "cloud": "azure",
+    "component": "files",
+    "item": "Block Blob Hot LRS data stored, first 50 TB",
+    "unit": "GB-month",
+    "unit_price": 0.0208,
+    "quantity": 500,
+    "monthly_ondemand": 10.4,
+    "commit_unit_price": null,
+    "monthly_commit": 10.4,
+    "commit_label": "",
+    "source": "api",
+    "url": "https://prices.azure.com/api/retail/prices",
+    "retrieved": "2026-11-05",
+    "note": "500 GB"
+   },
+   {
+    "cloud": "azure",
+    "component": "egress",
+    "item": "Standard data transfer out, Microsoft network routing",
+    "unit": "GB",
+    "unit_price": 0.087,
+    "quantity": 100,
+    "monthly_ondemand": 8.7,
+    "commit_unit_price": null,
+    "monthly_commit": 8.7,
+    "commit_label": "",
+    "source": "api",
+    "url": "https://prices.azure.com/api/retail/prices",
+    "retrieved": "2026-11-05",
+    "note": "200 GB; first 100 GB per month priced at $0 by the API, next tier $0.087"
+   }
+  ],
+  "unpriced": [
+   {
+    "cloud": "gcp",
+    "component": "web",
+    "item": "OS licence",
+    "source": "unpriced",
+    "note": "not found"
+   }
+  ],
+  "sources": [
+   {
+    "cloud": "aws",
+    "url": "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonEC2/current/us-east-1/index.csv",
+    "retrieved": "2026-11-05",
+    "source": "api",
+    "items": [
+     "EC2 m7i.large Linux, shared, on demand"
+    ]
+   },
+   {
+    "cloud": "aws",
+    "url": "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonS3/current/us-east-1/index.csv",
+    "retrieved": "2026-11-05",
+    "source": "api",
+    "items": [
+     "S3 Standard storage, first 50 TB tier"
+    ]
+   },
+   {
+    "cloud": "aws",
+    "url": "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSDataTransfer/current/us-east-1/index.csv",
+    "retrieved": "2026-11-05",
+    "source": "api",
+    "items": [
+     "Data transfer out to internet, first 10 TB tier"
+    ]
+   },
+   {
+    "cloud": "gcp",
+    "url": "https://cloud.google.com/products/compute/pricing/general-purpose",
+    "retrieved": "2026-11-05",
+    "source": "page",
+    "items": [
+     "n2-standard-2 on demand (Iowa)"
+    ]
+   },
+   {
+    "cloud": "gcp",
+    "url": "https://cloud.google.com/storage/pricing",
+    "retrieved": "2026-11-05",
+    "source": "page",
+    "items": [
+     "Cloud Storage Standard, regional (Iowa)",
+     "Internet egress, Premium tier, 0 to 10 TiB"
+    ]
+   },
+   {
+    "cloud": "azure",
+    "url": "https://prices.azure.com/api/retail/prices",
+    "retrieved": "2026-11-05",
+    "source": "api",
+    "items": [
+     "D2s v5 Linux pay as you go",
+     "Block Blob Hot LRS data stored, first 50 TB",
+     "Standard data transfer out, Microsoft network routing"
+    ]
+   }
+  ],
+  "source_mix": {
+   "api": 6,
+   "page": 3
+  }
+ },
+ "azure-files-missing-no-workload": {
+  "currency": "USD",
+  "retrieved": "2026-11-05",
+  "complete": false,
+  "warnings": [
+   "No overall cheapest cloud declared: 1 component(s) are not priced on every cloud (files on Azure). Totals are incomplete; the like for like comparison covers 2 of 3 components."
+  ],
+  "variance": {
+   "ondemand": {
+    "scenario": "ondemand",
+    "complete": false,
+    "totals": {
+     "aws": 167.67,
+     "gcp": 173.46,
+     "azure": 148.86
+    },
+    "annual": {
+     "aws": 2012.04,
+     "gcp": 2081.52,
+     "azure": 1786.32
+    },
+    "cheapest": null,
+    "vs_cheapest": null,
+    "incomplete_clouds": [
+     "azure"
+    ],
+    "like_for_like": {
+     "components": [
+      "web",
+      "egress"
+     ],
+     "excluded_components": [
+      "files"
+     ],
+     "totals": {
+      "aws": 156.17,
+      "gcp": 164.14,
+      "azure": 148.86
+     },
+     "cheapest": "azure",
+     "vs_cheapest": {
+      "aws": {
+       "usd": 7.31,
+       "pct": 4.9
+      },
+      "gcp": {
+       "usd": 15.28,
+       "pct": 10.3
+      },
+      "azure": {
+       "usd": 0.0,
+       "pct": 0.0
+      }
+     }
+    }
+   },
+   "commit": {
+    "scenario": "commit",
+    "complete": false,
+    "totals": {
+     "aws": 117.85,
+     "gcp": 120.99,
+     "azure": 95.2
+    },
+    "annual": {
+     "aws": 1414.2,
+     "gcp": 1451.88,
+     "azure": 1142.4
+    },
+    "cheapest": null,
+    "vs_cheapest": null,
+    "incomplete_clouds": [
+     "azure"
+    ],
+    "like_for_like": {
+     "components": [
+      "web",
+      "egress"
+     ],
+     "excluded_components": [
+      "files"
+     ],
+     "totals": {
+      "aws": 106.35,
+      "gcp": 111.68,
+      "azure": 95.2
+     },
+     "cheapest": "azure",
+     "vs_cheapest": {
+      "aws": {
+       "usd": 11.15,
+       "pct": 11.7
+      },
+      "gcp": {
+       "usd": 16.48,
+       "pct": 17.3
+      },
+      "azure": {
+       "usd": 0.0,
+       "pct": 0.0
+      }
+     }
+    }
+   }
+  },
+  "components": [
+   {
+    "component": "web",
+    "label": "web",
+    "comparable": true,
+    "gaps_on": [],
+    "ondemand": {
+     "aws": 147.17,
+     "gcp": 141.79,
+     "azure": 140.16
+    },
+    "ondemand_cheapest": "azure",
+    "ondemand_spread_usd": 7.01,
+    "commit": {
+     "aws": 97.35,
+     "gcp": 89.33,
+     "azure": 86.5
+    },
+    "commit_cheapest": "azure",
+    "commit_spread_usd": 10.85
+   },
+   {
+    "component": "files",
+    "label": "files",
+    "comparable": false,
+    "gaps_on": [
+     "azure"
+    ],
+    "ondemand": {
+     "aws": 11.5,
+     "gcp": 9.31,
+     "azure": 0.0
+    },
+    "ondemand_cheapest": null,
+    "ondemand_spread_usd": null,
+    "commit": {
+     "aws": 11.5,
+     "gcp": 9.31,
+     "azure": 0.0
+    },
+    "commit_cheapest": null,
+    "commit_spread_usd": null
+   },
+   {
+    "component": "egress",
+    "label": "egress",
+    "comparable": true,
+    "gaps_on": [],
+    "ondemand": {
+     "aws": 9.0,
+     "gcp": 22.35,
+     "azure": 8.7
+    },
+    "ondemand_cheapest": "azure",
+    "ondemand_spread_usd": 13.65,
+    "commit": {
+     "aws": 9.0,
+     "gcp": 22.35,
+     "azure": 8.7
+    },
+    "commit_cheapest": "azure",
+    "commit_spread_usd": 13.65
+   }
+  ],
+  "top_variance_drivers": [
+   {
+    "component": "egress",
+    "label": "egress",
+    "spread_usd": 13.65,
+    "share_of_component_spread_pct": 66.1
+   },
+   {
+    "component": "web",
+    "label": "web",
+    "spread_usd": 7.01,
+    "share_of_component_spread_pct": 33.9
+   }
+  ],
+  "lines": [
+   {
+    "cloud": "aws",
+    "component": "web",
+    "item": "EC2 m7i.large Linux, shared, on demand",
+    "unit": "hour",
+    "unit_price": 0.1008,
+    "quantity": 1460,
+    "monthly_ondemand": 147.168,
+    "commit_unit_price": 0.06668,
+    "monthly_commit": 97.3528,
+    "commit_label": "1 year Reserved standard, no upfront",
+    "source": "api",
+    "url": "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonEC2/current/us-east-1/index.csv",
+    "retrieved": "2026-11-05",
+    "note": "2 instances x 730 hours"
+   },
+   {
+    "cloud": "aws",
+    "component": "files",
+    "item": "S3 Standard storage, first 50 TB tier",
+    "unit": "GB-month",
+    "unit_price": 0.023,
+    "quantity": 500,
+    "monthly_ondemand": 11.5,
+    "commit_unit_price": null,
+    "monthly_commit": 11.5,
+    "commit_label": "",
+    "source": "api",
+    "url": "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonS3/current/us-east-1/index.csv",
+    "retrieved": "2026-11-05",
+    "note": "500 GB"
+   },
+   {
+    "cloud": "aws",
+    "component": "egress",
+    "item": "Data transfer out to internet, first 10 TB tier",
+    "unit": "GB",
+    "unit_price": 0.09,
+    "quantity": 100,
+    "monthly_ondemand": 9.0,
+    "commit_unit_price": null,
+    "monthly_commit": 9.0,
+    "commit_label": "",
+    "source": "api",
+    "url": "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSDataTransfer/current/us-east-1/index.csv",
+    "retrieved": "2026-11-05",
+    "note": "200 GB minus 100 GB monthly free allowance across AWS"
+   },
+   {
+    "cloud": "gcp",
+    "component": "web",
+    "item": "n2-standard-2 on demand (Iowa)",
+    "unit": "hour",
+    "unit_price": 0.097118,
+    "quantity": 1460,
+    "monthly_ondemand": 141.7923,
+    "commit_unit_price": 0.061182,
+    "monthly_commit": 89.3257,
+    "commit_label": "1 year resource based committed use",
+    "source": "page",
+    "url": "https://cloud.google.com/products/compute/pricing/general-purpose",
+    "retrieved": "2026-11-05",
+    "note": "2 instances x 730 hours; page showed Iowa (us-central1)"
+   },
+   {
+    "cloud": "gcp",
+    "component": "files",
+    "item": "Cloud Storage Standard, regional (Iowa)",
+    "unit": "GiB-month",
+    "unit_price": 0.02,
+    "quantity": 465.66,
+    "monthly_ondemand": 9.3132,
+    "commit_unit_price": null,
+    "monthly_commit": 9.3132,
+    "commit_label": "",
+    "source": "page",
+    "url": "https://cloud.google.com/storage/pricing",
+    "retrieved": "2026-11-05",
+    "note": "$0.000027397 per GiB hour x 730 = $0.0200 per GiB month; 500 GB = 465.66 GiB"
+   },
+   {
+    "cloud": "gcp",
+    "component": "egress",
+    "item": "Internet egress, Premium tier, 0 to 10 TiB",
+    "unit": "GiB",
+    "unit_price": 0.12,
+    "quantity": 186.26,
+    "monthly_ondemand": 22.3512,
+    "commit_unit_price": null,
+    "monthly_commit": 22.3512,
+    "commit_label": "",
+    "source": "page",
+    "url": "https://cloud.google.com/storage/pricing",
+    "retrieved": "2026-11-05",
+    "note": "200 GB = 186.26 GiB; worldwide destinations excluding Asia and Australia"
+   },
+   {
+    "cloud": "azure",
+    "component": "web",
+    "item": "D2s v5 Linux pay as you go",
+    "unit": "hour",
+    "unit_price": 0.096,
+    "quantity": 1460,
+    "monthly_ondemand": 140.16,
+    "commit_unit_price": 0.059247,
+    "monthly_commit": 86.5006,
+    "commit_label": "1 year reservation ($519 per term / 8,760 h)",
+    "source": "api",
+    "url": "https://prices.azure.com/api/retail/prices",
+    "retrieved": "2026-11-05",
+    "note": "2 instances x 730 hours"
+   },
+   {
+    "cloud": "azure",
+    "component": "egress",
+    "item": "Standard data transfer out, Microsoft network routing",
+    "unit": "GB",
+    "unit_price": 0.087,
+    "quantity": 100,
+    "monthly_ondemand": 8.7,
+    "commit_unit_price": null,
+    "monthly_commit": 8.7,
+    "commit_label": "",
+    "source": "api",
+    "url": "https://prices.azure.com/api/retail/prices",
+    "retrieved": "2026-11-05",
+    "note": "200 GB; first 100 GB per month priced at $0 by the API, next tier $0.087"
+   }
+  ],
+  "unpriced": [],
+  "sources": [
+   {
+    "cloud": "aws",
+    "url": "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonEC2/current/us-east-1/index.csv",
+    "retrieved": "2026-11-05",
+    "source": "api",
+    "items": [
+     "EC2 m7i.large Linux, shared, on demand"
+    ]
+   },
+   {
+    "cloud": "aws",
+    "url": "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonS3/current/us-east-1/index.csv",
+    "retrieved": "2026-11-05",
+    "source": "api",
+    "items": [
+     "S3 Standard storage, first 50 TB tier"
+    ]
+   },
+   {
+    "cloud": "aws",
+    "url": "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSDataTransfer/current/us-east-1/index.csv",
+    "retrieved": "2026-11-05",
+    "source": "api",
+    "items": [
+     "Data transfer out to internet, first 10 TB tier"
+    ]
+   },
+   {
+    "cloud": "gcp",
+    "url": "https://cloud.google.com/products/compute/pricing/general-purpose",
+    "retrieved": "2026-11-05",
+    "source": "page",
+    "items": [
+     "n2-standard-2 on demand (Iowa)"
+    ]
+   },
+   {
+    "cloud": "gcp",
+    "url": "https://cloud.google.com/storage/pricing",
+    "retrieved": "2026-11-05",
+    "source": "page",
+    "items": [
+     "Cloud Storage Standard, regional (Iowa)",
+     "Internet egress, Premium tier, 0 to 10 TiB"
+    ]
+   },
+   {
+    "cloud": "azure",
+    "url": "https://prices.azure.com/api/retail/prices",
+    "retrieved": "2026-11-05",
+    "source": "api",
+    "items": [
+     "D2s v5 Linux pay as you go",
+     "Standard data transfer out, Microsoft network routing"
+    ]
+   }
+  ],
+  "source_mix": {
+   "api": 5,
+   "page": 3
+  }
+ }
+}
