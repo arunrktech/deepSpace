@@ -20,5 +20,6 @@ export const nav: NavItem[] = [
   { path: '/settings', label: 'Settings' },
   // The /api-status debug page still exists — add
   // `{ path: '/api-status', label: 'API Status', devOnly: true }` to surface it.
+  { path: '/boards', label: 'Boards' },
   // ── Features add nav items below this line ──
 ]

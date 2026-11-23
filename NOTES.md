@@ -192,3 +192,49 @@ Take-home due **Wed Nov 25, 11:59 PM ET**.
 **What the owner verified:**
 - [ ] Read one hand-worked test (for example the queue test) and agree with the arithmetic
 - [ ] Agree with the LB and queue approximations above, or say what to change
+
+---
+
+## Step 5: Shared board on DeepSpace collections (2026-11-23)
+
+**DeepSpace docs read** (as Markdown via https://docs.deep.space/llms.txt, as the scaffold's `AGENTS.md` says to):
+- https://docs.deep.space/guides/data-storage: schema, `useQuery`, `useMutations`, `createConfirmed`
+- https://docs.deep.space/concepts/data-model and https://docs.deep.space/concepts/realtime-sync: write pipeline, and "the second wins on field-level merge"
+- https://docs.deep.space/concepts/permissions: roles; signed-in users default to `member`
+- https://docs.deep.space/sdk-reference/worker/schemas: column `storage` and `interpretation`, `maxLength`
+- https://docs.deep.space/sdk-reference/client/records: `where` is an exact match, filtered on the server
+- https://docs.deep.space/guides/canvas: read in order to decide against it
+
+**Files:**
+- `src/schemas/board-schemas.ts`: the `boards`, `components` and `flows` collections, registered in `src/schemas.ts`.
+- `src/board/fromRecords.ts` (+ test): records to the `Board` the cost engine takes.
+- `src/board/fields.ts`: how each sizing field shows in the form.
+- `src/pages/(app)/(protected)/boards/index.tsx` and `boards/[boardId].tsx`: the pages.
+- A "Boards" item in `src/nav.ts`.
+
+**Decisions and tradeoffs:**
+- **Collections, not the Canvas room.** Canvas stores free-form shapes, and `moveShape` isn't sent back to the sender. Our board is typed data (type, sizing, flows), which is what collections hold. Each record is checked against permissions on the server, and the cost panel and the AI reviewer can read it directly. Positions are plain `x`/`y` columns for a later visual layout.
+- **One column per sizing field, not a JSON `sizing` column.** The docs say concurrent `put`s merge field by field. With separate columns, two people editing different fields of the same component both keep their change. A JSON column would be replaced whole and silently drop one edit. **Verified live (below).**
+- **Each component reads only its own type's fields.** A stale `vcpu` left on a record is ignored if the type doesn't use it. An empty column means "use the default", and the form's "Default" option clears it.
+- **Permissions:** every signed-in `member` can read and write every board; signed-out visitors get nothing. The tradeoff is no per-team privacy yet (the `'team'` permission level would add it).
+- **Text and number fields save on blur or Enter**, not on every keystroke, so half-typed values aren't broadcast. While you're typing, a remote change doesn't overwrite your draft; after you leave the field, it shows the shared value again.
+- **Deleting a component removes its flows first, then the component.** The records layer has no transactions, so this is done one record at a time on the client. `fromRecords` also drops any flow whose end is missing, so a half-finished delete never shows up in prices.
+- **`createConfirmed` for new boards**, so the board page opens only after the server has accepted the board. Plain `create` is used for components, because the list updates when the server echoes the change back.
+
+**What the agent did:**
+- Wrote the schemas, the mapping and the pages.
+- Results: `vitest run` gives **150/150** passing (6 new), `tsc --noEmit` is clean, and `eslint src` is clean.
+- The type-check caught two problems: a missing `ComponentProps` import, and a cast of the defaults union. Both fixed.
+- Restarted the dev server (`deepspace dev kill`, then `dev start`), since schemas load when the worker starts.
+- Signed out, `/boards` shows "Sign in to continue" (the gate works).
+- **Live test in two Chrome tabs** after the owner signed in, on a board called "Sync test" (left in local dev data):
+  1. Tab A created the board and added a Database and a Service. Tab B showed both within about 1 s.
+  2. **Field merge:** tab B typed Count = 3 while tab A changed vCPU to 4 on the same service, then tab B saved. Both tabs then showed "Count 3 · vCPU 4", so neither edit was lost.
+  3. Tab A added the flow Service 1 → Database 1 "SQL". Tab B showed "Flows (1)".
+  4. Tab B deleted Database 1. Tab A showed "Components (1)" and "Flows (0)": the component and its flow were both gone.
+  5. No console errors in either tab.
+- Sign-in note: the browser pane didn't keep a session, so the test ran in the owner's Chrome. The owner completed Google sign-in themselves.
+
+**What the owner verified:**
+- [x] Signed in (Chrome)
+- [ ] Open a board in two windows and edit it yourself
