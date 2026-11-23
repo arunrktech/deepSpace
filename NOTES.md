@@ -238,3 +238,40 @@ Take-home due **Wed Nov 25, 11:59 PM ET**.
 **What the owner verified:**
 - [x] Signed in (Chrome)
 - [ ] Open a board in two windows and edit it yourself
+
+---
+
+## Step 6: Live cost panel (2026-11-23)
+
+**DeepSpace docs:** no new feature is used. The panel relies on https://docs.deep.space/concepts/realtime-sync (every accepted write is broadcast to every subscribed client) and https://docs.deep.space/sdk-reference/client/records (`useQuery` `orderBy`/`orderDir`), both read in step 5.
+
+**Files:**
+- `src/board/costView.ts` (+ test): turns the `compute()` result into what the panel shows. Pure.
+- `src/board/CostPanel.tsx`: the panel.
+- `boards/[boardId].tsx`: runs `useMemo(boardFromRecords → boardToPrices → compute)` over the page's existing three queries and renders the panel above the components.
+
+**Decisions and tradeoffs:**
+- **Each browser computes the cost; nothing is stored.** Every viewer gets the same records and runs the same code with the same bundled price snapshot, so every viewer sees the same numbers on every edit. A server-computed, stored total would add a second write per edit, a moment where the stored totals disagree with the board, and a race when two edits land together. The tradeoff: a viewer on an older version of the app sees its older snapshot until they reload. The panel footer shows the snapshot date.
+- **`useMemo` sits above the page's early returns**, because React hooks must run in the same order on every render.
+- **"Cheapest" only on a complete comparison**, following the cost model's fair-comparison rule. Otherwise the panel shows the model's own warning plus the like-for-like comparison. Each unpriced component says why it's unpriced, using the reason from its unpriced line.
+- **The scenario toggle (on demand / 1-year commitment) and expanded rows are per viewer** (React state), not shared. One person looking at commitment prices shouldn't change everyone's view.
+- **Provenance in the panel:** each expanded row shows the vendor item, quantity × unit price = monthly cost, the note on how the quantity was derived, and a link to the official source URL.
+- **Board lists are oldest-first** (`orderDir: 'asc'`). The live test showed `orderBy: 'createdAt'` alone lists newest first.
+
+**What the agent did:**
+- Wrote the three pieces.
+- Results: `vitest run` gives **159/159** passing (9 new), `tsc --noEmit` is clean, and `eslint src` is clean.
+- **Live test in two Chrome tabs** on a new board, "Cost check" (left in local dev data):
+  1. An empty board shows only the internet egress line, at the 200 GB default.
+  2. Tab A added a Service and Object storage, both on default sizing (2 × 2 vCPU, 500 GB, 200 GB egress = the comparator's example). Tab B's panel showed **AWS $167.67 / GCP $173.46 / Azure $159.26, Azure cheapest**, exactly the comparator's totals.
+  3. Tab A set the service to 4 vCPU. Tab B updated to AWS **$314.84** (2 × 730 h × $0.2016 + $11.50 + $9.00).
+  4. Tab B switched to the 1-year commitment: AWS **$215.21** (1,460 h × $0.13336 + $11.50 + $9.00). Tab A stayed on on-demand, so the toggle is per viewer.
+  5. The expanded Service row showed each cloud's SKU, quantity × price, the note and the source link. No console errors.
+- **Found and fixed during the test:**
+  - Azure's derived commitment price showed as `$0.1184931506849315`; unit prices are now formatted to at most 6 decimals (`$0.118493`).
+  - Lists were newest-first; now oldest-first.
+  - Re-checked both in the browser.
+- **Unconfirmed:** the first "+ Object storage" click, sent immediately after "+ Service", didn't add a component; a second click did. Most likely my automated click landed while the page was shifting (the editor panel opens on add), but I didn't prove that. Worth watching for during manual testing.
+
+**What the owner verified:**
+- [ ] Open "Cost check" in two windows, change a size, and watch the totals move in both

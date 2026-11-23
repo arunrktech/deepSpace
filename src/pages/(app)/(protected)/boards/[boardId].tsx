@@ -9,13 +9,16 @@
  * Text and number fields save on blur or Enter, not on every keystroke, so a
  * half-typed value isn't broadcast to everyone.
  */
-import { useEffect, useState, type ComponentProps, type ReactNode } from 'react'
+import { useEffect, useMemo, useState, type ComponentProps, type ReactNode } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { useMutations, useQuery } from 'deepspace'
-import { Button, Input, Label, useToast } from '@/components/ui'
+import { Button, Input, Label } from '@/components/ui'
 import { COMPONENT_TYPES, DEFAULT_SIZING, LABEL, type ComponentType } from '../../../../cost/board'
-import type { BoardRow, ComponentRow, FlowRow } from '../../../../board/fromRecords'
+import { compute } from '../../../../cost/costModel'
+import { boardToPrices } from '../../../../cost/quantify'
+import { boardFromRecords, type BoardRow, type ComponentRow, type FlowRow } from '../../../../board/fromRecords'
 import { fieldsFor, specFor } from '../../../../board/fields'
+import { CostPanel } from '../../../../board/CostPanel'
 
 const selectClass =
   'h-10 w-full rounded-md border border-input bg-transparent px-3 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring'
@@ -23,8 +26,8 @@ const selectClass =
 export default function BoardPage() {
   const { boardId = '' } = useParams()
   const boards = useQuery<BoardRow>('boards')
-  const components = useQuery<ComponentRow>('components', { where: { boardId }, orderBy: 'createdAt' })
-  const flows = useQuery<FlowRow>('flows', { where: { boardId }, orderBy: 'createdAt' })
+  const components = useQuery<ComponentRow>('components', { where: { boardId }, orderBy: 'createdAt', orderDir: 'asc' })
+  const flows = useQuery<FlowRow>('flows', { where: { boardId }, orderBy: 'createdAt', orderDir: 'asc' })
   const boardMut = useMutations<BoardRow>('boards')
   const compMut = useMutations<ComponentRow>('components')
   const flowMut = useMutations<FlowRow>('flows')
@@ -32,6 +35,14 @@ export default function BoardPage() {
 
   const board = boards.records.find((b) => b.recordId === boardId)
   const selected = components.records.find((c) => c.recordId === selectedId)
+
+  // The live cost: recalculated in this browser whenever any synced record
+  // changes. Every viewer has the same records and the same price snapshot,
+  // so every viewer sees the same numbers, and nothing is stored.
+  const cost = useMemo(() => {
+    const { prices, workload } = boardToPrices(boardFromRecords(board, components.records, flows.records))
+    return compute(prices, workload)
+  }, [board, components.records, flows.records])
 
   if (boards.status === 'loading') return <p className="p-6 text-sm text-muted-foreground">Loading board…</p>
   if (!board) {
@@ -78,6 +89,10 @@ export default function BoardPage() {
             onSave={(v) => boardMut.put(boardId, { egress_gb: v })}
           />
         </div>
+      </div>
+
+      <div className="mt-6">
+        <CostPanel result={cost} />
       </div>
 
       <section className="mt-6">
