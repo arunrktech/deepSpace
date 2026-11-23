@@ -145,3 +145,50 @@ Take-home due **Wed Nov 25, 11:59 PM ET**.
 - [ ] Azure D2s v5 East US Linux: $0.096/h (https://azure.microsoft.com/pricing/details/virtual-machines/linux/)
 - [ ] Azure Application Gateway Standard v2 East US fixed price: $0.20/h (https://azure.microsoft.com/pricing/details/application-gateway/)
 - [ ] GCP Memorystore for Valkey standard-small, South Carolina: $0.161/h (https://cloud.google.com/memorystore/valkey/pricing)
+
+---
+
+## Step 4: Board sizing → price lines (2026-11-23)
+
+**Docs read:** none needed (no DeepSpace features).
+
+**Files:**
+- `src/cost/board.ts`: the board's component types, their sizing fields with defaults (from the comparator's `sizing_defaults.md`), and the category and tier for each type.
+- `src/cost/quantify.ts`: `boardToPrices(board)` returns `{ prices, workload }` for `compute()`. Its helpers are `toVendorUnit` (GB to GiB or TiB) and `splitTiers` (one line per price band).
+- `src/cost/quantify.test.ts`
+
+**How sizing becomes quantity:**
+
+| Type | Sizing (default) | Quantity |
+|---|---|---|
+| service | count (2), vCPU 2/4/8 (2), hours (730) | count × hours of `vm.{n}vcpu` |
+| database | vCPU 2/4 (2), HA (yes), storage GB (100) | 730 h of `db.{n}vcpu[.ha]` + storage of `db.storage[.ha]` |
+| cache | size small/medium (small), HA (yes) | 730 h of `cache.{size}[.ha]` |
+| queue | M messages (10), message KB (1) | **AWS and Azure:** messages × 3 requests × started 64 KB chunks. **GCP:** messages × max(1, KB) × 2 (publish + subscribe), in TiB. **Azure** also pays the $10 base fee. |
+| LB | count (1), GB processed (100) | count × 730 h + processing. AWS LCU-hours and Azure CU-hours ≈ GB; GCP per GiB. |
+| CDN | GB delivered (500), M requests (5) | base fee (Azure $35) + transfer + requests ÷ 10K |
+| storage | GB (500) | GB-month on AWS and Azure; GiB-month on GCP |
+| internet egress (board level) | GB per month (200) | its own "Internet egress" component, like the comparator's `data_transfer_out` |
+
+**Decisions and tradeoffs:**
+- **Egress is a board setting, not one of the seven component types.** That keeps it visible as its own line instead of hidden inside the LB or CDN. It's often the biggest difference between clouds.
+- **Sizing values are checked one by one.** A missing value takes the default and is labelled `default` in `sizing_basis`. A bad value (negative, NaN, a string, or a size not in the snapshot such as 6 vCPU) makes that component **unpriced on every cloud**, with the reason in the note. The cost model's fair-comparison rule then leaves it out of the ranking and names no overall cheapest cloud. Nothing is ever guessed.
+- **Tiered prices give one line per band**, with the band in the item name (for example "0 to 51,200 GB-month band"), per `pricing_quirks.md`. Bands have no published commitment price, so they carry none.
+- **Base fees of $0** (SQS, Pub/Sub, CloudFront, Cloud CDN) are skipped instead of shown as $0 lines.
+- **Each output line's note says how its quantity was worked out** (for example "50M messages x 3 requests ..."), so the AI reviewer and the UI can explain any number.
+
+**Approximations (stated in line notes too):**
+- **LB:** only throughput is counted. ALB LCUs and Application Gateway capacity units also count new connections, active connections and rules, so a connection-heavy app costs more.
+- **Queue:** "3 requests per message" (send, receive, delete) is a planning rule of thumb, not a vendor figure. Batching would lower it.
+- **Not modelled:** storage requests and operations, CDN cache fill, and the Pub/Sub, SQS and CloudFront free tiers.
+
+**The key test, a cross-check against the comparator:** a board with 2 × 2-vCPU services, 500 GB of storage and 200 GB of egress (the comparator's own example workload) goes through `boardToPrices` and `compute`. It gives exactly the comparator's on-demand totals: **AWS $167.67, GCP $173.46, Azure $159.26**. That checks the hours, the GiB conversion (500 GB = 465.66 GiB), the 100 GB free egress band and tier splitting all together.
+
+**What the agent did:**
+- Wrote the three files.
+- Results: `vitest run` gives **144/144** passing (24 new), `tsc --noEmit` is clean, and `eslint src/cost` is clean.
+- The type-check caught one problem in `readSizing`: TypeScript merged the switch's per-type return objects into one union. It was fixed by declaring the inner function's return type.
+
+**What the owner verified:**
+- [ ] Read one hand-worked test (for example the queue test) and agree with the arithmetic
+- [ ] Agree with the LB and queue approximations above, or say what to change
