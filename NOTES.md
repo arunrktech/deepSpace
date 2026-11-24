@@ -492,7 +492,7 @@ The worker already had `AppPresenceRoom` wired, so presence needed no server cha
 - [ ] T19 No secrets in history: search `git log -p` for key patterns; `.dev.vars` is gitignored.
 - [ ] Spot check 5 prices from Step 3 against their official pages.
 
-Note for T16 and T17: the live site is still release #1. This step's changes (the readiness fix, Delete board, test ids) aren't deployed, as agreed ("Do not deploy"). The probe is development-only and isn't in any build.
+Note for T16 and T17: at the time of Step 10 the live site was release #1; release #2 (Step 12) now includes the readiness fix, Delete board and the test ids. The probe is development-only and isn't in any build.
 
 ---
 
@@ -530,3 +530,15 @@ Note for T16 and T17: the live site is still release #1. This step's changes (th
 
 **What the owner verified:**
 - [ ] After the next deploy: `curl -i -X POST https://archreview.app.space/api/integrations/exa/search -H "Content-Type: application/json" -d "{}"` returns 404 "Integration not enabled for this app"
+
+**Push and redeploy (owner-approved), 2026-11-24 02:49 UTC:**
+- Secrets scan of the 3 unpushed commits: no key patterns, no secret-named files. One test-account email (`bob-0aca2168@deepspace.test`, no password) is in `OWNER_CHECKLIST.md`, which the owner approved.
+- The first push was rejected: GitHub `main` had the owner's own web edit `87c2e37` ("Update NOTES.md", one line in Step 1). The 3 local, never-pushed commits were rebased onto it; no published history was rewritten. The push then advanced `87c2e37..758cf8e`.
+- `npx deepspace deploy` → **release #2 `rel_01M85Q9SEENJH2N673FFV8HR5H`**, from a clean tree at `758cf8e` (15 of 21 assets uploaded).
+- **Live checks:**
+  - Signed-out `POST /api/integrations/exa/search` → **404 `{"error":"Integration not enabled for this app"}`**
+  - Listed `google/*` signed out → 401
+  - `reviewBoard` signed out → 401
+  - `/`, `/home`, `/boards` → 200
+  - `__archreviewTestProbe` appears 0 times in the live entry script
+- The live site now includes Step 10's readiness fix and Delete board, and this step's integration fix.

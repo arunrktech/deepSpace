@@ -2,7 +2,7 @@
 
 Each item maps to an unticked "What the owner verified" box in NOTES.md (line numbers in brackets). Tick it there yourself and add one line on what you saw. The whole list takes about 45 minutes.
 
-The live site is still release #1, so the Step 10 changes (Delete board, the "Connecting…" fix) are only on localhost.
+The live site is release #2, which includes the Step 10 changes (Delete board, the "Connecting…" fix) and the Step 12 integration fix.
 
 ## Block 1: Live app with two accounts (about 12 minutes)
 
