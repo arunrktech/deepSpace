@@ -3,14 +3,18 @@
  *
  * Configure who pays for each integration's API calls.
  *
- * - 'developer': The app owner pays (default).
+ * - 'developer': The app owner pays.
  * - 'user': The calling user pays.
  *
  * Every integration requires a signed-in caller. Set `anonymous: true` on a
  * 'developer' integration to let signed-out visitors call it too — the owner
  * then pays for anyone who can reach the app.
  *
- * Integrations not listed here default to 'developer' with sign-in required.
+ * Integrations NOT listed here are refused (404 from /api/integrations, and
+ * `integration_not_enabled` from server actions' tools.integration). This app
+ * uses no integrations; listing one is a deliberate decision about who pays.
+ * (The starter defaulted unlisted ones to 'developer', so any signed-in user
+ * could spend the owner's credits. NOTES.md, step 12.)
  *
  * IMPORTANT: any integration backed by per-user connected accounts (Google,
  * Composio) must be 'user' — the api-worker resolves the account from the

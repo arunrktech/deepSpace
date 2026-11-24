@@ -104,7 +104,18 @@ function createActionTools(env: Env, userId: string, callerJwt: string): ActionT
       }
     }
     const integrationName = target.name
-    const billingMode = lookupOwn(integrations, integrationName)?.billing ?? 'developer'
+    // Deny by default (NOTES.md, step 12): only integrations listed in
+    // src/integrations.ts are reachable. The starter fell back to 'developer'
+    // (owner pays) for anything unlisted.
+    const config = lookupOwn(integrations, integrationName)
+    if (!config) {
+      return {
+        success: false,
+        code: 'integration_not_enabled',
+        error: `Integration ${JSON.stringify(integrationName)} is not enabled for this app`,
+      }
+    }
+    const billingMode = config.billing
 
     // The api-worker bills the JWT subject: owner for developer mode, caller
     // for user mode. It does not accept a client-supplied billing override.

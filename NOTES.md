@@ -493,3 +493,40 @@ The worker already had `AppPresenceRoom` wired, so presence needed no server cha
 - [ ] Spot check 5 prices from Step 3 against their official pages.
 
 Note for T16 and T17: the live site is still release #1. This step's changes (the readiness fix, Delete board, test ids) aren't deployed, as agreed ("Do not deploy"). The probe is development-only and isn't in any build.
+
+---
+
+## Step 12: Close the owner-billed integration gap (2026-11-23)
+
+**DeepSpace docs read:** https://docs.deep.space/guides/external-apis, section "Billing - developer vs user". `'developer'` (owner pays) is the **default** for integrations not listed in `src/integrations.ts`, and the guide warns that sign-in alone is not spend control.
+
+**Found while checking the Step 11 security claims:** the starter's `POST /api/integrations/:name/:endpoint` (`src/server/http-routes.ts`) attached the owner's `APP_OWNER_JWT` for any **unlisted** integration, for any signed-in user. Anyone who signs in with GitHub or Google becomes a member. Server actions' `tools.integration` (`src/server/action-routes.ts`) had the same `?? 'developer'` fallback. The app uses no integrations. Not affected: `GET /api/integrations` (the free catalog) and `/api/debug/*` (off unless `ALLOW_DEBUG_ROUTES` is set, and admin-only).
+
+**Files:**
+- `src/server/http-routes.ts`
+- `src/server/action-routes.ts`
+- `src/integrations.ts` (comment only)
+- `tests/api.spec.ts` (3 tests)
+- `README.md` (the security bullet changed from "Known gap" to fixed)
+
+**Decisions:**
+- **Deny by default** instead of flipping the default to caller-pays. An unlisted integration is refused before any token is attached: `404 {"error":"Integration not enabled for this app"}` from the route, and `{ success: false, code: 'integration_not_enabled' }` from actions. Listing an integration becomes a deliberate decision about who pays. The listed starter entries (`google`, `composio`, both caller-billed) behave exactly as before.
+- **Tests go in `api.spec.ts`**, where the testing guide puts status-code and auth-gating checks. The signed-in test trades the session cookie for a bearer token with `POST /api/auth/token`, the same call the SDK's `getAuthToken` makes, so it sends the request a real member's browser would.
+- **Empty request bodies**, so that even before the fix the platform would refuse on validation rather than run a paid call.
+
+**What the agent did (exact results):**
+- **Before the fix** (owner-approved run):
+  - Signed out, unlisted `exa/search` → **401** (the old sign-in check).
+  - **Signed in with a bearer token, unlisted `exa/search` → 502 "Integration proxy failed"**: the request got past every app-side check and the proxy tried to forward it with the owner's token. The upstream call threw instead of completing, so no paid call ran as far as the app can see.
+  - Listed `google/*` signed out → 401.
+  - A first version of the signed-in test sent only the session cookie and got 401. It would have passed after the fix without proving anything, so it was corrected to send a bearer token like the app does.
+- **After the fix:**
+  - The 3 integration tests → **3/3 pass** (signed-out unlisted → 404; signed-in unlisted → 404; listed still → 401).
+  - `tsc` and `eslint .` clean.
+  - Unit tests **177/177**.
+  - `npm run check:probe` → no test probe in 26 built files.
+  - `npx deepspace test run all --port 5180` → **exit 0**: Playwright **21 passed, 1 skipped** (T15, opt-in).
+- Not deployed yet; the live site (release #1) still has the gap until the next deploy.
+
+**What the owner verified:**
+- [ ] After the next deploy: `curl -i -X POST https://archreview.app.space/api/integrations/exa/search -H "Content-Type: application/json" -d "{}"` returns 404 "Integration not enabled for this app"
