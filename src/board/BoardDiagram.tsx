@@ -154,6 +154,8 @@ export function BoardDiagram({ components, flows, selectedId, onSelect, onMove, 
           return (
             <g
               key={c.recordId}
+              data-testid="diagram-box"
+              data-component-id={c.recordId}
               transform={`translate(${p.x},${p.y})`}
               role="button"
               tabIndex={0}
@@ -193,7 +195,12 @@ export function BoardDiagram({ components, flows, selectedId, onSelect, onMove, 
                 </g>
               )}
               {peers.map((s, i) => (
-                <g key={s.userId} transform={`translate(${12 + i * 22},${BOX.height - 6})`}>
+                <g
+                  key={s.userId}
+                  data-testid="peer-editing"
+                  aria-label={`${s.userName} is editing this`}
+                  transform={`translate(${12 + i * 22},${BOX.height - 6})`}
+                >
                   <title>{`${s.userName} is editing this`}</title>
                   <circle r={9} cy={-4} style={{ fill: s.color }} />
                   <text y={0} textAnchor="middle" className="fill-white text-[9px] font-semibold">

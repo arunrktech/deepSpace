@@ -13,7 +13,7 @@
  * browser-default widgets (docs: design/product-polish).
  */
 import { useEffect, useMemo, useState, type ComponentProps, type ReactNode } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useMutations, useQuery } from 'deepspace'
 import {
   Button, ConfirmModal, Input, Label, Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
@@ -45,10 +45,17 @@ export default function BoardPage() {
   const flowMut = useMutations<FlowRow>('flows')
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [confirmDelete, setConfirmDelete] = useState(false)
+  const [confirmDeleteBoard, setConfirmDeleteBoard] = useState(false)
+  const navigate = useNavigate()
   const presence = useBoardPresence(boardId, selectedId)
 
   const board = boards.records.find((b) => b.recordId === boardId)
   const selected = components.records.find((c) => c.recordId === selectedId)
+  // Adding is only safe once the records connection has finished starting up:
+  // a write made earlier is silently lost (see boards/index.tsx and NOTES.md,
+  // step 10). Editing, dragging and deleting need a loaded component, so they
+  // can't happen before this anyway.
+  const ready = components.status === 'ready' && flows.status === 'ready'
 
   // The live cost: recalculated in this browser whenever any synced record
   // changes. Every viewer has the same records and the same price snapshot,
@@ -90,6 +97,19 @@ export default function BoardPage() {
     void id.then(setSelectedId)
   }
 
+  /**
+   * Delete the whole board: flows, then components, then the board record,
+   * one write at a time (no transactions in the records layer). Reviews stay:
+   * members can't delete them by design (only the server writes reviews), and
+   * with the board gone nothing shows them.
+   */
+  function deleteBoard() {
+    for (const f of flows.records) flowMut.remove(f.recordId)
+    for (const c of components.records) compMut.remove(c.recordId)
+    boardMut.remove(boardId)
+    navigate('/boards')
+  }
+
   function deleteComponent(id: string) {
     // No transactions in the records layer, so remove the flows first, then the component.
     for (const f of flows.records) {
@@ -111,6 +131,9 @@ export default function BoardPage() {
             className="text-lg font-semibold"
           />
         </div>
+        <Button variant="outline" size="sm" onClick={() => setConfirmDeleteBoard(true)}>
+          Delete board
+        </Button>
         <div className="w-56">
           <Label htmlFor="egress">Internet egress to users (GB per month)</Label>
           <NumberSave
@@ -137,7 +160,7 @@ export default function BoardPage() {
         <h2 className="mb-2 text-sm font-medium text-muted-foreground">Add a component</h2>
         <div className="flex flex-wrap gap-2">
           {COMPONENT_TYPES.map((t) => (
-            <Button key={t} variant="outline" size="sm" onClick={() => addComponent(t)}>
+            <Button key={t} variant="outline" size="sm" disabled={!ready} onClick={() => addComponent(t)}>
               + {LABEL[t]}
             </Button>
           ))}
@@ -212,6 +235,7 @@ export default function BoardPage() {
             boardId={boardId}
             components={components.records}
             flows={flows.records}
+            ready={ready}
             onAdd={(row) => flowMut.create(row)}
             onRemove={(id) => flowMut.remove(id)}
           />
@@ -230,6 +254,19 @@ export default function BoardPage() {
           )}
         </aside>
       </div>
+
+      <ConfirmModal
+        open={confirmDeleteBoard}
+        onClose={() => setConfirmDeleteBoard(false)}
+        onConfirm={() => {
+          setConfirmDeleteBoard(false)
+          deleteBoard()
+        }}
+        title={`Delete board "${board.data.name}"?`}
+        description={`This removes the board and its ${components.records.length} component(s) and ${flows.records.length} flow(s) for everyone.`}
+        confirmText="Delete board"
+        variant="destructive"
+      />
 
       <ConfirmModal
         open={confirmDelete && !!selected}
@@ -328,12 +365,14 @@ function FlowsEditor({
   boardId,
   components,
   flows,
+  ready,
   onAdd,
   onRemove,
 }: {
   boardId: string
   components: { recordId: string; data: ComponentRow }[]
   flows: { recordId: string; data: FlowRow }[]
+  ready: boolean
   onAdd: (row: FlowRow) => void
   onRemove: (id: string) => void
 }) {
@@ -352,7 +391,7 @@ function FlowsEditor({
         className="grid gap-2 sm:grid-cols-[1fr_1fr_1fr_auto]"
         onSubmit={(e) => {
           e.preventDefault()
-          if (!fromId || !toId || fromId === toId) return
+          if (!ready || !fromId || !toId || fromId === toId) return
           onAdd({ boardId, fromId, toId, label: label.trim() })
           setLabel('')
         }}
@@ -366,7 +405,7 @@ function FlowsEditor({
           <SelectContent>{options}</SelectContent>
         </Select>
         <Input aria-label="Flow label" value={label} onChange={(e) => setLabel(e.target.value)} placeholder="Label (optional)" maxLength={80} />
-        <Button type="submit" variant="secondary" disabled={!fromId || !toId || fromId === toId}>Add flow</Button>
+        <Button type="submit" variant="secondary" disabled={!ready || !fromId || !toId || fromId === toId}>Add flow</Button>
       </form>
       {fromId && fromId === toId && <p className="mt-1 text-xs text-destructive">A flow needs two different components.</p>}
       {flows.length > 0 && (

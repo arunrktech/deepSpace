@@ -14,10 +14,17 @@ export default function BoardsPage() {
   const navigate = useNavigate()
   const { error } = useToast()
   const [name, setName] = useState('')
+  const [creating, setCreating] = useState(false)
+  // Writes are only safe once the records connection has finished starting up.
+  // A write made before that is silently lost: nothing is sent, nothing fails
+  // (found by tests/board.spec.ts; diagnosis in NOTES.md, step 10). The query
+  // reporting 'ready' is the signal that the connection is up.
+  const ready = status === 'ready'
 
   async function createBoard() {
     const trimmed = name.trim()
-    if (!trimmed) return
+    if (!trimmed || !ready || creating) return
+    setCreating(true)
     try {
       // Confirmed: wait for the server to accept before opening the board.
       const id = await createConfirmed({ name: trimmed })
@@ -25,6 +32,8 @@ export default function BoardsPage() {
       navigate(`/boards/${id}`)
     } catch (e) {
       error('Could not create board', String(e))
+    } finally {
+      setCreating(false)
     }
   }
 
@@ -43,7 +52,9 @@ export default function BoardsPage() {
         }}
       >
         <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="New board name" maxLength={120} />
-        <Button type="submit" disabled={!name.trim()}>Create board</Button>
+        <Button type="submit" disabled={!ready || !name.trim() || creating} loading={creating}>
+          {ready ? 'Create board' : 'Connecting…'}
+        </Button>
       </form>
 
       {status === 'loading' ? (

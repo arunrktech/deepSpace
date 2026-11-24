@@ -15,7 +15,7 @@
  * their own layout without inheriting it.
  */
 
-import { Suspense, type ReactNode } from 'react'
+import { Suspense, lazy, type ReactNode } from 'react'
 import { Outlet } from 'react-router-dom'
 import { DeepSpaceAuthProvider, useAuthStatus } from 'deepspace'
 import { RecordProvider, RecordScope, AgentTools } from 'deepspace'
@@ -23,6 +23,16 @@ import Navigation from '../../components/Navigation'
 import { useToast } from '@/components/ui'
 import { APP_DISPLAY_NAME, SCOPE_ID } from '../../constants'
 import { schemas } from '../../schemas'
+
+/**
+ * Test probe for tests/board.spec.ts T14 (see src/dev/TestProbe.tsx).
+ * `import.meta.env.DEV` is `false` in `vite build`, so this whole expression
+ * becomes `null` and the probe module is never referenced in production.
+ * scripts/check-no-test-probe.mjs verifies that against the built bundle.
+ */
+const TestProbe = import.meta.env.DEV
+  ? lazy(() => import('../../dev/TestProbe').then((m) => ({ default: m.TestProbe })))
+  : null
 
 export default function AppLayout() {
   return (
@@ -74,6 +84,11 @@ function AuthBoot({ children }: { children: ReactNode }) {
     >
       <RecordScope roomId={SCOPE_ID} schemas={schemas}>
         <AgentTools />
+        {TestProbe && (
+          <Suspense fallback={null}>
+            <TestProbe />
+          </Suspense>
+        )}
         {children}
       </RecordScope>
     </RecordProvider>
