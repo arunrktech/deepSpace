@@ -41,7 +41,7 @@ Take-home due **Wed Nov 25, 11:59 PM ET**.
 
 **What the owner verified:**
 - [x] Logged in with `npx deepspace auth login`
-- [ ] `http://localhost:5173` loads the starter app (the agent checked this; the owner hasn't yet)
+- [ ] `http://localhost:5173` loads the starter app
 
 ---
 
