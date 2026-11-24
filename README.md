@@ -85,7 +85,14 @@ The owner did:
 - Chose GitHub as the app's permanent source, and approved the push with their own Git author.
 - Chose the development-only test probe (option 3) for the forged-review test.
 - Created the two test accounts.
-- <<OWNER: add your own verifications here>>
+- Ran every check in [OWNER_CHECKLIST.md](OWNER_CHECKLIST.md) on 2026-11-24 and ticked all 27 boxes in NOTES.md:
+  - a two-account test on the live site (totals moving in both windows, presence, drag, a review appearing in both, "Board changed"), with `deepspace logs` showing no errors;
+  - the signed-out pages;
+  - five price spot checks against the official AWS, Google Cloud and Azure pages, all matching (the agent read the pages with the right regions selected; the owner validated the values);
+  - the unit tests, and the cost model port against the original Python;
+  - the secrets search of the git history;
+  - the live check that unlisted integrations are refused.
+- Decided to keep the load balancer and queue approximations, and Claude Sonnet 5.5 billed to whoever clicks.
 
 ## What it does
 
