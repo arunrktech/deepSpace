@@ -41,7 +41,7 @@ Take-home due **Wed Nov 25, 11:59 PM ET**.
 
 **What the owner verified:**
 - [x] Logged in with `npx deepspace auth login`
-- [ ] `http://localhost:5173` loads the starter app
+- [x] `http://localhost:5173` loads the starter app (owner: done in OWNER_CHECKLIST Block 2, 2026-11-24)
 
 ---
 
@@ -79,8 +79,8 @@ Take-home due **Wed Nov 25, 11:59 PM ET**.
 - Example on-demand totals match the original: **AWS $167.67, GCP $173.46, Azure $159.26 (Azure cheapest)**.
 
 **What the owner verified:**
-- [ ] Read `costModel.ts` side by side with `cost_model.py`
-- [ ] Ran `npm run test:unit` yourself
+- [x] Read `costModel.ts` side by side with `cost_model.py` (owner: done in OWNER_CHECKLIST Block 4, 2026-11-24)
+- [x] Ran `npm run test:unit` yourself (owner: done in OWNER_CHECKLIST Block 4, 2026-11-24)
 
 ---
 
@@ -140,11 +140,11 @@ Take-home due **Wed Nov 25, 11:59 PM ET**.
 **What the tests prove:** one price per key per cloud; every URL passes `officialUrl`; every entry is dated, finite and non-negative; commitment prices are no higher than on demand; tiers are in order and open-ended; HA costs at least as much as single; the whole snapshot passes the cost model's `validate()`; and four derived numbers match their notes. They **can't** prove a price is correct. That needs a human check against the source.
 
 **What the owner verified (spot-check five prices against their source):**
-- [ ] AWS EC2 m7i.large $0.1008/h; 1-year no upfront $0.06668/h (https://aws.amazon.com/ec2/pricing/on-demand/ and its Reserved tab)
-- [ ] GCP n2-standard-2, South Carolina: $0.097118/h (https://cloud.google.com/products/compute/pricing/general-purpose)
-- [ ] Azure D2s v5 East US Linux: $0.096/h (https://azure.microsoft.com/pricing/details/virtual-machines/linux/)
-- [ ] Azure Application Gateway Standard v2 East US fixed price: $0.20/h (https://azure.microsoft.com/pricing/details/application-gateway/)
-- [ ] GCP Memorystore for Valkey standard-small, South Carolina: $0.161/h (https://cloud.google.com/memorystore/valkey/pricing)
+- [x] AWS EC2 m7i.large $0.1008/h; 1-year no upfront $0.06668/h (https://aws.amazon.com/ec2/pricing/on-demand/ and its Reserved tab) (owner: Block 3, 2026-11-24: page US East N. Virginia Linux shows $0.1008000000/h; reserved 1-yr no upfront $48.68/month = $0.066685/h)
+- [x] GCP n2-standard-2, South Carolina: $0.097118/h (https://cloud.google.com/products/compute/pricing/general-purpose) (owner: Block 3, 2026-11-24: page us-east1 shows $0.097118/h, 1-yr resource CUD $0.061182/h)
+- [x] Azure D2s v5 East US Linux: $0.096/h (https://azure.microsoft.com/pricing/details/virtual-machines/linux/) (owner: Block 3, 2026-11-24: page East US shows $70.08/month = $0.096/h)
+- [x] Azure Application Gateway Standard v2 East US fixed price: $0.20/h (https://azure.microsoft.com/pricing/details/application-gateway/) (owner: Block 3, 2026-11-24: page East US shows $0.20/gateway-hour and $0.008/CU-hour; the $0.246 was the Central US default)
+- [x] GCP Memorystore for Valkey standard-small, South Carolina: $0.161/h (https://cloud.google.com/memorystore/valkey/pricing) (owner: Block 3, 2026-11-24: page us-east1 shows $0.161/h)
 
 ---
 
@@ -190,8 +190,8 @@ Take-home due **Wed Nov 25, 11:59 PM ET**.
 - The type-check caught one problem in `readSizing`: TypeScript merged the switch's per-type return objects into one union. It was fixed by declaring the inner function's return type.
 
 **What the owner verified:**
-- [ ] Read one hand-worked test (for example the queue test) and agree with the arithmetic
-- [ ] Agree with the LB and queue approximations above, or say what to change
+- [x] Read one hand-worked test (for example the queue test) and agree with the arithmetic (owner: done in OWNER_CHECKLIST Block 4, 2026-11-24)
+- [x] Agree with the LB and queue approximations above, or say what to change (owner: Block 5, accepted the LB throughput-only and 3-requests-per-message approximations as they are, 2026-11-24)
 
 ---
 
@@ -237,7 +237,7 @@ Take-home due **Wed Nov 25, 11:59 PM ET**.
 
 **What the owner verified:**
 - [x] Signed in (Chrome)
-- [ ] Open a board in two windows and edit it yourself
+- [x] Open a board in two windows and edit it yourself (owner: done in OWNER_CHECKLIST Block 1, 2026-11-24)
 
 ---
 
@@ -274,7 +274,7 @@ Take-home due **Wed Nov 25, 11:59 PM ET**.
 - **Unconfirmed:** the first "+ Object storage" click, sent immediately after "+ Service", didn't add a component; a second click did. Most likely my automated click landed while the page was shifting (the editor panel opens on add), but I didn't prove that. Worth watching for during manual testing.
 
 **What the owner verified:**
-- [ ] Open "Cost check" in two windows, change a size, and watch the totals move in both
+- [x] Open "Cost check" in two windows, change a size, and watch the totals move in both (owner: done in OWNER_CHECKLIST Block 1, 2026-11-24)
 
 ---
 
@@ -332,8 +332,8 @@ I also read the starter's `src/ai/agent.ts`, `tools.ts` and `chat-routes.ts`, wh
 - **Not tested live:** that a browser *can't* create a `reviews` record. That rests on the schema (`create: false`), which the docs say is enforced on the server, but I didn't try a forged write.
 
 **What the owner verified:**
-- [ ] Read the review on "Cost check" and judge whether the findings are sensible
-- [ ] Decide: keep Sonnet 5.5 and caller-pays, or switch
+- [x] Read the review on "Cost check" and judge whether the findings are sensible (owner: Block 5, read the review, findings are sensible, 2026-11-24)
+- [x] Decide: keep Sonnet 5.5 and caller-pays, or switch (owner: Block 5, keep Claude Sonnet 5.5 billed to whoever clicks, 2026-11-24)
 
 ---
 
@@ -381,8 +381,8 @@ The worker already had `AppPresenceRoom` wired, so presence needed no server cha
 - **Not checked live:** the signed-out `/home`, which would mean signing the owner out.
 
 **What the owner verified:**
-- [ ] Drag a box yourself, and watch another window
-- [ ] Look at the landing page `/` signed out (a private window) and judge the copy
+- [x] Drag a box yourself, and watch another window (owner: done in OWNER_CHECKLIST Block 1, 2026-11-24)
+- [x] Look at the landing page `/` signed out (a private window) and judge the copy (owner: done in OWNER_CHECKLIST Block 2, 2026-11-24)
 
 ---
 
@@ -418,8 +418,8 @@ The worker already had `AppPresenceRoom` wired, so presence needed no server cha
 
 **What the owner verified:**
 - [x] Signed in on the live site
-- [ ] Open https://archreview.app.space in two windows and try it yourself
-- [ ] Still open from earlier steps: spot-check prices (step 3), the LB and queue approximations (step 4), the reviewer's model and billing (step 7)
+- [x] Open https://archreview.app.space in two windows and try it yourself (owner: done in OWNER_CHECKLIST Block 1, 2026-11-24)
+- [x] Still open from earlier steps: spot-check prices (step 3), the LB and queue approximations (step 4), the reviewer's model and billing (step 7) (owner: Blocks 3 to 5 done, 2026-11-24)
 
 ---
 
@@ -486,11 +486,11 @@ The worker already had `AppPresenceRoom` wired, so presence needed no server cha
 - No deploy in this step.
 
 **What the owner verified (manual checks on the live URL):**
-- [ ] T16 Full path on https://archreview.app.space in Chrome plus an incognito window with a second account: create board, add components, edit sizing, see totals move in both, run review, see findings in both, edit and see "Board changed".
-- [ ] T17 Signed out /home shows the pitch and example panel, not the boards list.
-- [ ] T18 `npx deepspace logs --follow --json` during T16 shows no exceptions.
-- [ ] T19 No secrets in history: search `git log -p` for key patterns; `.dev.vars` is gitignored.
-- [ ] Spot check 5 prices from Step 3 against their official pages.
+- [x] T16 Full path on https://archreview.app.space in Chrome plus an incognito window with a second account: create board, add components, edit sizing, see totals move in both, run review, see findings in both, edit and see "Board changed". (owner: done in OWNER_CHECKLIST Block 1, 2026-11-24)
+- [x] T17 Signed out /home shows the pitch and example panel, not the boards list. (owner: done in OWNER_CHECKLIST Block 2, 2026-11-24)
+- [x] T18 `npx deepspace logs --follow --json` during T16 shows no exceptions. (owner: done in OWNER_CHECKLIST Block 1, 2026-11-24)
+- [x] T19 No secrets in history: search `git log -p` for key patterns; `.dev.vars` is gitignored. (owner: Block 6, history search Count 0, .dev.vars git-ignored and not tracked, 2026-11-24)
+- [x] Spot check 5 prices from Step 3 against their official pages. (owner: Block 3, 2026-11-24: all 5 match, see Step 3 boxes)
 
 Note for T16 and T17: at the time of Step 10 the live site was release #1; release #2 (Step 12) now includes the readiness fix, Delete board and the test ids. The probe is development-only and isn't in any build.
 
@@ -529,7 +529,7 @@ Note for T16 and T17: at the time of Step 10 the live site was release #1; relea
 - Not deployed yet; the live site (release #1) still has the gap until the next deploy.
 
 **What the owner verified:**
-- [ ] After the next deploy: `curl -i -X POST https://archreview.app.space/api/integrations/exa/search -H "Content-Type: application/json" -d "{}"` returns 404 "Integration not enabled for this app"
+- [x] After the next deploy: `curl -i -X POST https://archreview.app.space/api/integrations/exa/search -H "Content-Type: application/json" -d "{}"` returns 404 "Integration not enabled for this app" (owner: live curl returns 404 Integration not enabled for this app, 2026-11-24)
 
 **Push and redeploy (owner-approved), 2026-11-24 02:49 UTC:**
 - Secrets scan of the 3 unpushed commits: no key patterns, no secret-named files. One test-account email (`bob-0aca2168@deepspace.test`, no password) is in `OWNER_CHECKLIST.md`, which the owner approved.
